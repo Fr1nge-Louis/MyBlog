@@ -48,7 +48,7 @@ public class CodeGenerator {
     private static final String packageController = "com.fr1nge.myblog.controller";
     private static final String packageEntity = "com.fr1nge.myblog.entity";
     private static final String packageService = "com.fr1nge.myblog.service";
-    private static final String packageMapper = "com.fr1nge.myblog.mapper";
+    private static final String packageMapper = "com.fr1nge.myblog.dao";
     private static final String packageServiceImpl = "com.fr1nge.myblog.service.impl";
 
 

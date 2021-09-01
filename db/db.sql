@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS `jdbc_test`;
 
 CREATE TABLE `jdbc_test` (
-  `type` varchar(100) DEFAULT NULL COMMENT '类型',
-  `name` varchar(100) DEFAULT NULL COMMENT '名称'
+                             `type` varchar(100) DEFAULT NULL COMMENT '类型',
+                             `name` varchar(100) DEFAULT NULL COMMENT '名称'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -17,12 +17,12 @@ insert  into `jdbc_test`(`type`,`name`) values ('类别2','测试类2');
 DROP TABLE IF EXISTS `admin_user`;
 
 CREATE TABLE `admin_user` (
-  `admin_user_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '管理员id',
-  `login_user_name` varchar(50) NOT NULL COMMENT '管理员登陆名称',
-  `login_password` varchar(50) NOT NULL COMMENT '管理员登陆密码',
-  `nick_name` varchar(50) NOT NULL COMMENT '管理员显示昵称',
-  `locked` tinyint(4) DEFAULT '0' COMMENT '是否锁定 0未锁定 1已锁定无法登陆',
-  PRIMARY KEY (`admin_user_id`)
+                              `admin_user_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '管理员id',
+                              `login_user_name` varchar(50) NOT NULL COMMENT '管理员登陆名称',
+                              `login_password` varchar(50) NOT NULL COMMENT '管理员登陆密码',
+                              `nick_name` varchar(50) NOT NULL COMMENT '管理员显示昵称',
+                              `locked` tinyint(4) DEFAULT '0' COMMENT '是否锁定 0未锁定 1已锁定无法登陆',
+                              PRIMARY KEY (`admin_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -34,21 +34,21 @@ insert  into `admin_user`(`admin_user_id`,`login_user_name`,`login_password`,`ni
 DROP TABLE IF EXISTS `blog`;
 
 CREATE TABLE `blog` (
-  `blog_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '博客表主键id',
-  `blog_title` varchar(200) NOT NULL COMMENT '博客标题',
-  `blog_sub_url` varchar(200) NOT NULL COMMENT '博客自定义路径url',
-  `blog_cover_image` varchar(200) NOT NULL COMMENT '博客封面图',
-  `blog_content` mediumtext NOT NULL COMMENT '博客内容',
-  `blog_category_id` int(11) NOT NULL COMMENT '博客分类id',
-  `blog_category_name` varchar(50) NOT NULL COMMENT '博客分类(冗余字段)',
-  `blog_tags` varchar(200) NOT NULL COMMENT '博客标签',
-  `blog_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-草稿 1-发布',
-  `blog_views` bigint(20) NOT NULL DEFAULT '0' COMMENT '阅读量',
-  `enable_comment` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-允许评论 1-不允许评论',
-  `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
-  PRIMARY KEY (`blog_id`)
+                        `blog_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '博客表主键id',
+                        `blog_title` varchar(200) NOT NULL COMMENT '博客标题',
+                        `blog_sub_url` varchar(200) NOT NULL COMMENT '博客自定义路径url',
+                        `blog_cover_image` varchar(200) NOT NULL COMMENT '博客封面图',
+                        `blog_content` mediumtext NOT NULL COMMENT '博客内容',
+                        `blog_category_id` int(11) NOT NULL COMMENT '博客分类id',
+                        `blog_category_name` varchar(50) NOT NULL COMMENT '博客分类(冗余字段)',
+                        `blog_tags` varchar(200) NOT NULL COMMENT '博客标签',
+                        `blog_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-草稿 1-发布',
+                        `blog_views` bigint(20) NOT NULL DEFAULT '0' COMMENT '阅读量',
+                        `enable_comment` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-允许评论 1-不允许评论',
+                        `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
+                        `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+                        `update_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+                        PRIMARY KEY (`blog_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -63,13 +63,13 @@ insert  into `blog`(`blog_id`,`blog_title`,`blog_sub_url`,`blog_cover_image`,`bl
 DROP TABLE IF EXISTS `blog_category`;
 
 CREATE TABLE `blog_category` (
-  `category_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '分类表主键',
-  `category_name` varchar(50) NOT NULL COMMENT '分类的名称',
-  `category_icon` varchar(50) NOT NULL COMMENT '分类的图标',
-  `category_rank` int(11) NOT NULL DEFAULT '1' COMMENT '分类的排序值 被使用的越多数值越大',
-  `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`category_id`)
+                                 `category_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '分类表主键',
+                                 `category_name` varchar(50) NOT NULL COMMENT '分类的名称',
+                                 `category_icon` varchar(50) NOT NULL COMMENT '分类的图标',
+                                 `category_rank` int(11) NOT NULL DEFAULT '1' COMMENT '分类的排序值 被使用的越多数值越大',
+                                 `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
+                                 `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                 PRIMARY KEY (`category_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -83,19 +83,19 @@ insert  into `blog_category`(`category_id`,`category_name`,`category_icon`,`cate
 DROP TABLE IF EXISTS `blog_comment`;
 
 CREATE TABLE `blog_comment` (
-  `comment_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `blog_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '关联的blog主键',
-  `commentator` varchar(50) NOT NULL DEFAULT '' COMMENT '评论者名称',
-  `email` varchar(100) NOT NULL DEFAULT '' COMMENT '评论人的邮箱',
-  `website_url` varchar(50) NOT NULL DEFAULT '' COMMENT '网址',
-  `comment_body` varchar(200) NOT NULL DEFAULT '' COMMENT '评论内容',
-  `comment_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评论提交时间',
-  `commentator_ip` varchar(20) NOT NULL DEFAULT '' COMMENT '评论时的ip地址',
-  `reply_body` varchar(200) NOT NULL DEFAULT '' COMMENT '回复内容',
-  `reply_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '回复时间',
-  `comment_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否审核通过 0-未审核 1-审核通过',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '是否删除 0-未删除 1-已删除',
-  PRIMARY KEY (`comment_id`)
+                                `comment_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+                                `blog_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '关联的blog主键',
+                                `commentator` varchar(50) NOT NULL DEFAULT '' COMMENT '评论者名称',
+                                `email` varchar(100) NOT NULL DEFAULT '' COMMENT '评论人的邮箱',
+                                `website_url` varchar(50) NOT NULL DEFAULT '' COMMENT '网址',
+                                `comment_body` varchar(200) NOT NULL DEFAULT '' COMMENT '评论内容',
+                                `comment_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评论提交时间',
+                                `commentator_ip` varchar(20) NOT NULL DEFAULT '' COMMENT '评论时的ip地址',
+                                `reply_body` varchar(200) NOT NULL DEFAULT '' COMMENT '回复内容',
+                                `reply_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '回复时间',
+                                `comment_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否审核通过 0-未审核 1-审核通过',
+                                `is_deleted` tinyint(4) DEFAULT '0' COMMENT '是否删除 0-未删除 1-已删除',
+                                PRIMARY KEY (`comment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -107,11 +107,11 @@ insert  into `blog_comment`(`comment_id`,`blog_id`,`commentator`,`email`,`websit
 DROP TABLE IF EXISTS `blog_tag`;
 
 CREATE TABLE `blog_tag` (
-  `tag_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '标签表主键id',
-  `tag_name` varchar(100) NOT NULL COMMENT '标签名称',
-  `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`tag_id`)
+                            `tag_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '标签表主键id',
+                            `tag_name` varchar(100) NOT NULL COMMENT '标签名称',
+                            `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
+                            `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                            PRIMARY KEY (`tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -134,11 +134,11 @@ insert  into `blog_tag`(`tag_id`,`tag_name`,`is_deleted`,`create_time`) values (
 DROP TABLE IF EXISTS `blog_tag_relation`;
 
 CREATE TABLE `blog_tag_relation` (
-  `relation_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '关系表id',
-  `blog_id` bigint(20) NOT NULL COMMENT '博客id',
-  `tag_id` int(11) NOT NULL COMMENT '标签id',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
-  PRIMARY KEY (`relation_id`)
+                                     `relation_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '关系表id',
+                                     `blog_id` bigint(20) NOT NULL COMMENT '博客id',
+                                     `tag_id` int(11) NOT NULL COMMENT '标签id',
+                                     `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+                                     PRIMARY KEY (`relation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -158,66 +158,70 @@ insert  into `blog_tag_relation`(`relation_id`,`blog_id`,`tag_id`,`create_time`)
 
 
 
-DROP TABLE IF EXISTS `config`;
+DROP TABLE IF EXISTS `blog_config`;
 
-CREATE TABLE `config` (
-  `config_name` varchar(100) NOT NULL DEFAULT '' COMMENT '配置项的名称',
-  `config_value` varchar(200) NOT NULL DEFAULT '' COMMENT '配置项的值',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
-  PRIMARY KEY (`config_name`)
+CREATE TABLE `blog_config` (
+                               `config_id` int NOT NULL AUTO_INCREMENT COMMENT '配置表主键id',
+                               `config_name` varchar(100) NOT NULL COMMENT '配置项的名称',
+                               `config_value` varchar(200) NOT NULL COMMENT '配置项的值',
+                               `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                               `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+                               PRIMARY KEY (`config_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerAbout','your personal blog. have fun.','2018-11-11 20:33:23','2018-11-12 11:58:06');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerCopyRight','2019 十三','2018-11-11 20:33:31','2018-11-12 11:58:06');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerICP','浙ICP备17008806号-3','2018-11-11 20:33:27','2018-11-12 11:58:06');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerPoweredBy','https://github.com/ZHENFENG13','2018-11-11 20:33:36','2018-11-12 11:58:06');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerPoweredByURL','https://github.com/ZHENFENG13','2018-11-11 20:33:39','2018-11-12 11:58:06');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteDescription','personal blog是SpringBoot2+Thymeleaf+Mybatis建造的个人博客网站.SpringBoot实战博客源码.个人博客搭建','2018-11-11 20:33:04','2018-11-11 22:05:14');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteIcon','/admin/dist/img/favicon.png','2018-11-11 20:33:11','2018-11-11 22:05:14');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteLogo','/admin/dist/img/logo2.png','2018-11-11 20:33:08','2018-11-11 22:05:14');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteName','personal blog','2018-11-11 20:33:01','2018-11-11 22:05:14');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourAvatar','/admin/dist/img/13.png','2018-11-11 20:33:14','2019-05-07 21:56:23');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourEmail','2449207463@qq.com','2018-11-11 20:33:17','2019-05-07 21:56:23');
-insert  into `config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourName','13','2018-11-11 20:33:20','2019-05-07 21:56:23');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerAbout','your personal blog. have fun.','2018-11-11 20:33:23','2018-11-12 11:58:06');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerCopyRight','2019 十三','2018-11-11 20:33:31','2018-11-12 11:58:06');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerICP','浙ICP备17008806号-3','2018-11-11 20:33:27','2018-11-12 11:58:06');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerPoweredBy','https://github.com/ZHENFENG13','2018-11-11 20:33:36','2018-11-12 11:58:06');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('footerPoweredByURL','https://github.com/ZHENFENG13','2018-11-11 20:33:39','2018-11-12 11:58:06');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteDescription','personal blog是SpringBoot2+Thymeleaf+Mybatis建造的个人博客网站.SpringBoot实战博客源码.个人博客搭建','2018-11-11 20:33:04','2018-11-11 22:05:14');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteIcon','/admin/dist/img/favicon.png','2018-11-11 20:33:11','2018-11-11 22:05:14');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteLogo','/admin/dist/img/logo2.png','2018-11-11 20:33:08','2018-11-11 22:05:14');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('websiteName','personal blog','2018-11-11 20:33:01','2018-11-11 22:05:14');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourAvatar','/admin/dist/img/13.png','2018-11-11 20:33:14','2019-05-07 21:56:23');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourEmail','2449207463@qq.com','2018-11-11 20:33:17','2019-05-07 21:56:23');
+insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourName','13','2018-11-11 20:33:20','2019-05-07 21:56:23');
 
 
 
-DROP TABLE IF EXISTS `link`;
+DROP TABLE IF EXISTS `blog_link`;
 
-CREATE TABLE `link` (
-  `link_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '友链表主键id',
-  `link_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '友链类别 0-友链 1-推荐 2-个人网站',
-  `link_name` varchar(50) NOT NULL COMMENT '网站名称',
-  `link_url` varchar(100) NOT NULL COMMENT '网站链接',
-  `link_description` varchar(100) NOT NULL COMMENT '网站描述',
-  `link_rank` int(11) NOT NULL DEFAULT '0' COMMENT '用于列表排序',
-  `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0-未删除 1-已删除',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
-  PRIMARY KEY (`link_id`)
+CREATE TABLE `blog_link` (
+                             `link_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '友链表主键id',
+                             `link_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '友链类别 0-友链 1-推荐 2-个人网站',
+                             `link_name` varchar(50) NOT NULL COMMENT '网站名称',
+                             `link_url` varchar(100) NOT NULL COMMENT '网站链接',
+                             `link_description` varchar(100) NOT NULL COMMENT '网站描述',
+                             `link_rank` int(11) NOT NULL DEFAULT '0' COMMENT '用于列表排序',
+                             `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0-未删除 1-已删除',
+                             `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+                             PRIMARY KEY (`link_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (1,0,'tqr','rqwe','rqw',0,1,'2018-10-22 18:57:52');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (2,2,'十三的GitHub','https://github.com/ZHENFENG13','十三分享代码的地方',1,0,'2018-10-22 19:41:04');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (3,2,'十三的博客','http://13blog.site','个人独立博客13blog',14,0,'2018-10-22 19:53:34');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (4,1,'CSDN 图文课','https://gitchat.csdn.net','IT优质内容平台',6,0,'2018-10-22 19:55:55');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (5,2,'十三的博客园','https://www.cnblogs.com/han-1034683568','最开始写博客的地方',17,0,'2018-10-22 19:56:14');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (6,1,'CSDN','https://www.csdn.net/','CSDN-专业IT技术社区官网',4,0,'2018-10-22 19:56:47');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (7,0,'梁桂钊的博客','http://blog.720ui.com','后端攻城狮',1,0,'2018-10-22 20:01:38');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (8,0,'猿天地','http://cxytiandi.com','一个综合性的网站,以程序猿用户为主,提供各种开发相关的内容',12,0,'2018-10-22 20:02:41');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (9,0,'Giraffe Home','https://yemengying.com/','Giraffe Home',0,0,'2018-10-22 20:27:04');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (10,0,'纯洁的微笑','http://www.ityouknow.com','分享技术，分享生活',3,0,'2018-10-22 20:27:16');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (11,0,'afsdf','http://localhost:28080/admin/links','fad',0,1,'2018-10-22 20:27:26');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (12,1,'afsdf','http://localhost','fad1',0,1,'2018-10-24 14:04:18');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (13,0,'郭赵晖','http://guozh.net/','老郭三分地',0,0,'2019-04-24 15:30:19');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (14,0,'dalaoyang','https://www.dalaoyang.cn/','dalaoyang',0,0,'2019-04-24 15:31:50');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (15,0,'mushblog','https://www.sansani.cn','穆世明博客',0,0,'2019-04-24 15:32:19');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (16,1,'实验楼','https://www.shiyanlou.com/','一家专注于IT技术的在线实训平台',17,0,'2019-04-24 16:03:48');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (17,2,'《SSM 搭建精美实用的管理系统》','https://gitbook.cn/gitchat/column/5b4dae389bcda53d07056bc9','Spring+SpringMVC+MyBatis实战课程',18,0,'2019-04-24 16:06:52');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (18,2,'《Spring Boot 入门及前后端分离项目实践》','https://www.shiyanlou.com/courses/1244','SpringBoot实战课程',19,0,'2019-04-24 16:07:27');
-insert  into `link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (19,2,'《玩转Spring Boot 系列》','https://www.shiyanlou.com/courses/1274','SpringBoot实战课程',20,0,'2019-04-24 16:10:30');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (1,0,'tqr','rqwe','rqw',0,1,'2018-10-22 18:57:52');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (2,2,'十三的GitHub','https://github.com/ZHENFENG13','十三分享代码的地方',1,0,'2018-10-22 19:41:04');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (3,2,'十三的博客','http://13blog.site','个人独立博客13blog',14,0,'2018-10-22 19:53:34');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (4,1,'CSDN 图文课','https://gitchat.csdn.net','IT优质内容平台',6,0,'2018-10-22 19:55:55');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (5,2,'十三的博客园','https://www.cnblogs.com/han-1034683568','最开始写博客的地方',17,0,'2018-10-22 19:56:14');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (6,1,'CSDN','https://www.csdn.net/','CSDN-专业IT技术社区官网',4,0,'2018-10-22 19:56:47');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (7,0,'梁桂钊的博客','http://blog.720ui.com','后端攻城狮',1,0,'2018-10-22 20:01:38');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (8,0,'猿天地','http://cxytiandi.com','一个综合性的网站,以程序猿用户为主,提供各种开发相关的内容',12,0,'2018-10-22 20:02:41');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (9,0,'Giraffe Home','https://yemengying.com/','Giraffe Home',0,0,'2018-10-22 20:27:04');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (10,0,'纯洁的微笑','http://www.ityouknow.com','分享技术，分享生活',3,0,'2018-10-22 20:27:16');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (11,0,'afsdf','http://localhost:28080/admin/links','fad',0,1,'2018-10-22 20:27:26');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (12,1,'afsdf','http://localhost','fad1',0,1,'2018-10-24 14:04:18');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (13,0,'郭赵晖','http://guozh.net/','老郭三分地',0,0,'2019-04-24 15:30:19');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (14,0,'dalaoyang','https://www.dalaoyang.cn/','dalaoyang',0,0,'2019-04-24 15:31:50');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (15,0,'mushblog','https://www.sansani.cn','穆世明博客',0,0,'2019-04-24 15:32:19');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (16,1,'实验楼','https://www.shiyanlou.com/','一家专注于IT技术的在线实训平台',17,0,'2019-04-24 16:03:48');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (17,2,'《SSM 搭建精美实用的管理系统》','https://gitbook.cn/gitchat/column/5b4dae389bcda53d07056bc9','Spring+SpringMVC+MyBatis实战课程',18,0,'2019-04-24 16:06:52');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (18,2,'《Spring Boot 入门及前后端分离项目实践》','https://www.shiyanlou.com/courses/1244','SpringBoot实战课程',19,0,'2019-04-24 16:07:27');
+insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (19,2,'《玩转Spring Boot 系列》','https://www.shiyanlou.com/courses/1274','SpringBoot实战课程',20,0,'2019-04-24 16:10:30');
+
+
+
 

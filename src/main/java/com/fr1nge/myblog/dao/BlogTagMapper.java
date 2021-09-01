@@ -1,4 +1,4 @@
-package com.fr1nge.myblog.mapper;
+package com.fr1nge.myblog.dao;
 
 import com.fr1nge.myblog.entity.BlogTag;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author author
- * @since 2021-08-30
+ * @since 2021-08-31
  */
 public interface BlogTagMapper extends BaseMapper<BlogTag> {
 

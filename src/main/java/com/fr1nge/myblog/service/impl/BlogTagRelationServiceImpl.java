@@ -1,7 +1,7 @@
 package com.fr1nge.myblog.service.impl;
 
 import com.fr1nge.myblog.entity.BlogTagRelation;
-import com.fr1nge.myblog.mapper.BlogTagRelationMapper;
+import com.fr1nge.myblog.dao.BlogTagRelationMapper;
 import com.fr1nge.myblog.service.BlogTagRelationService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @author author
- * @since 2021-08-30
+ * @since 2021-08-31
  */
 @Service
 public class BlogTagRelationServiceImpl extends ServiceImpl<BlogTagRelationMapper, BlogTagRelation> implements BlogTagRelationService {
