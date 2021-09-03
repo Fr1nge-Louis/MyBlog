@@ -102,12 +102,8 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-        <!--如果mapper放到src下需要添加这个标签-->
+        <!--如果mapper放到src/main/java下需要添加这个标签-->
         <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
             <resource>
                 <directory>src/main/java</directory>
                 <includes>
