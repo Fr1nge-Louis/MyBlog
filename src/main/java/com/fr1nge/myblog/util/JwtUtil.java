@@ -18,7 +18,7 @@ public class JwtUtil {
     public static String generateToken(String signingKey, String subject) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        Date expireTime = new Date(nowMillis+60*60*1000);
+        Date expireTime = new Date(nowMillis+15*60*1000);
         JwtBuilder builder = Jwts.builder()
                 .setSubject(subject)//储存的东西--用户名
                 .setIssuedAt(now)//时间点
