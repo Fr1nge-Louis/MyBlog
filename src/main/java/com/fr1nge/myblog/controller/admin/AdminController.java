@@ -5,6 +5,7 @@ import com.fr1nge.myblog.entity.AdminUser;
 import com.fr1nge.myblog.service.*;
 import com.fr1nge.myblog.util.GetMD5;
 import com.fr1nge.myblog.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/admin")
+@Slf4j
 public class AdminController {
 
     @Value("${jwt.token.name}")
@@ -70,9 +72,9 @@ public class AdminController {
         if (adminUser != null) {
             session.setAttribute("loginUser", adminUser.getNickName());
             session.setAttribute("loginUserId", adminUser.getAdminUserId());
-            session.setAttribute(tokenName, JwtUtil.generateToken(signingKey,adminUser.getLoginUserName()));
-            //session过期时间设置为7200秒 即两小时
-            //session.setMaxInactiveInterval(60 * 60 * 2);
+            String token = JwtUtil.generateToken(signingKey,adminUser.getNickName());
+            log.info("token="+token);
+            session.setAttribute(tokenName, token);
             return "redirect:/admin/index";
         } else {
             session.setAttribute("errorMsg", "登陆失败");
@@ -88,11 +90,11 @@ public class AdminController {
         return "admin/login";
     }
 
-    /**
+
     @GetMapping("/profile")
     public String profile(HttpServletRequest request) {
         Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
-        AdminUser adminUser = adminUserService.getUserDetailById(loginUserId);
+        AdminUser adminUser = adminUserService.getById(loginUserId);
         if (adminUser == null) {
             return "admin/login";
         }
@@ -104,36 +106,43 @@ public class AdminController {
 
     @PostMapping("/profile/password")
     @ResponseBody
-    public String passwordUpdate(HttpServletRequest request, @RequestParam("originalPassword") String originalPassword,
+    public String passwordUpdate(HttpServletRequest request,
+                                 @RequestParam("originalPassword") String originalPassword,
                                  @RequestParam("newPassword") String newPassword) {
-        if (StringUtils.isEmpty(originalPassword) || StringUtils.isEmpty(newPassword)) {
-            return "参数不能为空";
-        }
         Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
-        if (adminUserService.updatePassword(loginUserId, originalPassword, newPassword)) {
+        AdminUser adminUser = adminUserService.getById(loginUserId);
+
+        //判断原来的密码是否正确
+        if(!adminUser.getLoginPassword().equals(GetMD5.encryptString(originalPassword))){
+            return "修改失败";
+        }
+        //修改密码
+        adminUser.setLoginPassword(GetMD5.encryptString(newPassword));
+        if(adminUserService.updateById(adminUser)){
             //修改成功后清空session中的数据，前端控制跳转至登录页
             request.getSession().removeAttribute("loginUserId");
             request.getSession().removeAttribute("loginUser");
             request.getSession().removeAttribute("errorMsg");
+            return "success";
+        }else {
+            return "修改失败";
+        }
+
+    }
+
+    @PostMapping("/profile/name")
+    @ResponseBody
+    public String nameUpdate(HttpServletRequest request,
+                             @RequestParam("loginUserName") String loginUserName,
+                             @RequestParam("nickName") String nickName) {
+        Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
+        AdminUser adminUser = adminUserService.getById(loginUserId);
+        adminUser.setNickName(nickName).setLoginUserName(loginUserName);
+        if (adminUserService.updateById(adminUser)) {
             return "success";
         } else {
             return "修改失败";
         }
     }
 
-    @PostMapping("/profile/name")
-    @ResponseBody
-    public String nameUpdate(HttpServletRequest request, @RequestParam("loginUserName") String loginUserName,
-                             @RequestParam("nickName") String nickName) {
-        if (StringUtils.isEmpty(loginUserName) || StringUtils.isEmpty(nickName)) {
-            return "参数不能为空";
-        }
-        Integer loginUserId = (int) request.getSession().getAttribute("loginUserId");
-        if (adminUserService.updateName(loginUserId, loginUserName, nickName)) {
-            return "success";
-        } else {
-            return "修改失败";
-        }
-    }
-    **/
 }
