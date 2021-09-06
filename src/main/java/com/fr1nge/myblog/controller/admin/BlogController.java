@@ -81,7 +81,9 @@ public class BlogController {
 
     @GetMapping("/blogs/edit")
     public String edit(HttpServletRequest request) {
-        List<BlogCategory> blogCategoryList = categoryService.list();
+        LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted,0);
+        List<BlogCategory> blogCategoryList = categoryService.list(lambdaQueryWrapper);
         request.setAttribute("path", "edit");
         request.setAttribute("categories", blogCategoryList);
         return "admin/edit";
@@ -94,8 +96,11 @@ public class BlogController {
         if (blog == null) {
             return "error/error_400";
         }
+        LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted,0);
+        List<BlogCategory> blogCategoryList = categoryService.list(lambdaQueryWrapper);
         request.setAttribute("blog", blog);
-        request.setAttribute("categories", categoryService.list());
+        request.setAttribute("categories", blogCategoryList);
         return "admin/edit";
     }
 
