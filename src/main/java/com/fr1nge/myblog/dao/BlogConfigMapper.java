@@ -1,11 +1,11 @@
 package com.fr1nge.myblog.dao;
 
-import com.fr1nge.myblog.entity.BlogConfig;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.fr1nge.myblog.entity.BlogConfig;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author author
