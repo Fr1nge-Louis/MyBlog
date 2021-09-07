@@ -3,43 +3,44 @@ package com.fr1nge.myblog.util;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
- * 我们使用JJWT生成/解析JWT令牌
+ * JJWT生成/解析JWT令牌
  */
+@Slf4j
 public class JwtUtil {
-    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
     public static String generateToken(String signingKey, String subject) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-        Date expireTime = new Date(nowMillis+15*60*1000);
+        Date expireTime = new Date(nowMillis + 15 * 60 * 1000);
         JwtBuilder builder = Jwts.builder()
                 .setSubject(subject)//储存的东西--用户名
                 .setIssuedAt(now)//时间点
                 .signWith(SignatureAlgorithm.HS256, signingKey)//加密方法和签名
                 .setExpiration(expireTime);
+        log.debug("token expireTime = " + expireTime);
+        log.debug("token = " + builder.compact());
         return builder.compact();
     }
 
-    public static String getSubject(HttpServletRequest httpServletRequest, String jwtTokenName, String signingKey){
-        //String token = httpServletRequest.getHeader(jwtTokenName);
+    public static String getSubject(HttpServletRequest httpServletRequest, String jwtTokenName, String signingKey) {
         String token = (String) httpServletRequest.getSession().getAttribute(jwtTokenName);
-        if(token == null || token.trim().length() == 0){
+        if (token == null || token.trim().length() == 0) {
             return null;
-        }else {
+        } else {
             try {
                 return Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody().getSubject();
-            }catch (Exception e){
-                logger.error(e.getMessage());
+            } catch (Exception e) {
+                log.error(e.getMessage());
                 return null;
             }
         }
 
     }
+
 }
