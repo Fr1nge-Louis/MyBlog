@@ -13,21 +13,11 @@ import com.fr1nge.myblog.util.ResultGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 
 @Controller
@@ -48,26 +38,26 @@ public class BlogController {
                        @RequestParam(required = false) Integer limit) {
 
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-        if(StringUtils.isNotBlank(keyword)){
-            queryWrapper.like(Blog::getBlogTitle,keyword).or()
-                    .like(Blog::getBlogCategoryName,keyword);
+        if (StringUtils.isNotBlank(keyword)) {
+            queryWrapper.like(Blog::getBlogTitle, keyword).or()
+                    .like(Blog::getBlogCategoryName, keyword);
         }
-        if(StringUtils.isNotBlank(blogStatus)){
-            queryWrapper.eq(Blog::getBlogStatus,blogStatus);
+        if (StringUtils.isNotBlank(blogStatus)) {
+            queryWrapper.eq(Blog::getBlogStatus, blogStatus);
         }
-        if(StringUtils.isNotBlank(blogCategoryId)){
-            queryWrapper.eq(Blog::getBlogCategoryId,blogCategoryId);
+        if (StringUtils.isNotBlank(blogCategoryId)) {
+            queryWrapper.eq(Blog::getBlogCategoryId, blogCategoryId);
         }
-        if(page == null){
+        if (page == null) {
             page = 1;
         }
-        if(limit == null){
+        if (limit == null) {
             limit = 10;
         }
-        Page<Blog> pageQuery = new Page<>((page-1)*page,limit);
-        IPage<Blog> blogIPage = blogService.selectPage(pageQuery,queryWrapper);
-        PageResult pageResult =  new PageResult(blogIPage.getRecords(),
-                (int)blogIPage.getTotal(),(int)blogIPage.getSize(),(int)blogIPage.getCurrent());
+        Page<Blog> pageQuery = new Page<>((page - 1) * page, limit);
+        IPage<Blog> blogIPage = blogService.selectPage(pageQuery, queryWrapper);
+        PageResult pageResult = new PageResult(blogIPage.getRecords(),
+                (int) blogIPage.getTotal(), (int) blogIPage.getSize(), (int) blogIPage.getCurrent());
         return ResultGenerator.genSuccessResult(pageResult);
 
     }
@@ -82,7 +72,7 @@ public class BlogController {
     @GetMapping("/blogs/edit")
     public String edit(HttpServletRequest request) {
         LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted,0);
+        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
         List<BlogCategory> blogCategoryList = categoryService.list(lambdaQueryWrapper);
         request.setAttribute("path", "edit");
         request.setAttribute("categories", blogCategoryList);
@@ -97,7 +87,7 @@ public class BlogController {
             return "error/error_400";
         }
         LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted,0);
+        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
         List<BlogCategory> blogCategoryList = categoryService.list(lambdaQueryWrapper);
         request.setAttribute("blog", blog);
         request.setAttribute("categories", blogCategoryList);
@@ -115,14 +105,14 @@ public class BlogController {
                        @RequestParam("blogStatus") Integer blogStatus,
                        @RequestParam("enableComment") Integer enableComment) {
         Blog blog = new Blog()
-        .setBlogTitle(blogTitle)
-        .setBlogSubUrl(blogSubUrl)
-        .setBlogCategoryId(blogCategoryId)
-        .setBlogTags(blogTags)
-        .setBlogContent(blogContent)
-        .setBlogCoverImage(blogCoverImage)
-        .setBlogStatus(blogStatus)
-        .setEnableComment(enableComment);
+                .setBlogTitle(blogTitle)
+                .setBlogSubUrl(blogSubUrl)
+                .setBlogCategoryId(blogCategoryId)
+                .setBlogTags(blogTags)
+                .setBlogContent(blogContent)
+                .setBlogCoverImage(blogCoverImage)
+                .setBlogStatus(blogStatus)
+                .setEnableComment(enableComment);
 
         if (blogService.save(blog)) {
             return ResultGenerator.genSuccessResult("添加成功");
@@ -144,13 +134,13 @@ public class BlogController {
                          @RequestParam("enableComment") Integer enableComment) {
         Blog blog = blogService.getById(blogId);
         blog.setBlogTitle(blogTitle)
-        .setBlogSubUrl(blogSubUrl)
-        .setBlogCategoryId(blogCategoryId)
-        .setBlogTags(blogTags)
-        .setBlogContent(blogContent)
-        .setBlogCoverImage(blogCoverImage)
-        .setBlogStatus(blogStatus)
-        .setEnableComment(enableComment);
+                .setBlogSubUrl(blogSubUrl)
+                .setBlogCategoryId(blogCategoryId)
+                .setBlogTags(blogTags)
+                .setBlogContent(blogContent)
+                .setBlogCoverImage(blogCoverImage)
+                .setBlogStatus(blogStatus)
+                .setEnableComment(enableComment);
         if (blogService.updateById(blog)) {
             return ResultGenerator.genSuccessResult("修改成功");
         } else {

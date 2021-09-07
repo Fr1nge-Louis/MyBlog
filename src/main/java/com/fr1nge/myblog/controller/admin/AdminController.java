@@ -40,7 +40,7 @@ public class AdminController {
     @Resource
     private BlogCommentService commentService;
 
-    @GetMapping({ "/index"})
+    @GetMapping({"/index"})
     public String index(HttpServletRequest request) {
         request.setAttribute("path", "index");
         request.setAttribute("categoryCount", categoryService.count());
@@ -67,13 +67,13 @@ public class AdminController {
             return "admin/login";
         }
         QueryWrapper<AdminUser> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(AdminUser::getLoginUserName,userName).eq(AdminUser::getLoginPassword, GetMD5.encryptString (password));
+        wrapper.lambda().eq(AdminUser::getLoginUserName, userName).eq(AdminUser::getLoginPassword, GetMD5.encryptString(password));
         AdminUser adminUser = adminUserService.getOne(wrapper);
         if (adminUser != null) {
             session.setAttribute("loginUser", adminUser.getNickName());
             session.setAttribute("loginUserId", adminUser.getAdminUserId());
-            String token = JwtUtil.generateToken(signingKey,adminUser.getNickName());
-            log.info("token="+token);
+            String token = JwtUtil.generateToken(signingKey, adminUser.getNickName());
+            log.info("token=" + token);
             session.setAttribute(tokenName, token);
             return "redirect:/admin/index";
         } else {
@@ -113,18 +113,18 @@ public class AdminController {
         AdminUser adminUser = adminUserService.getById(loginUserId);
 
         //判断原来的密码是否正确
-        if(!adminUser.getLoginPassword().equals(GetMD5.encryptString(originalPassword))){
+        if (!adminUser.getLoginPassword().equals(GetMD5.encryptString(originalPassword))) {
             return "修改失败";
         }
         //修改密码
         adminUser.setLoginPassword(GetMD5.encryptString(newPassword));
-        if(adminUserService.updateById(adminUser)){
+        if (adminUserService.updateById(adminUser)) {
             //修改成功后清空session中的数据，前端控制跳转至登录页
             request.getSession().removeAttribute("loginUserId");
             request.getSession().removeAttribute("loginUser");
             request.getSession().removeAttribute("errorMsg");
             return "success";
-        }else {
+        } else {
             return "修改失败";
         }
 

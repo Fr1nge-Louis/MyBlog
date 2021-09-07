@@ -9,13 +9,11 @@ import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
 import com.fr1nge.myblog.util.ResultGenerator;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -35,22 +33,22 @@ public class CategoryController {
      */
     @RequestMapping(value = "/categories/list", method = RequestMethod.GET)
     @ResponseBody
-    public Result list( @RequestParam(required = false) Integer page,
-                        @RequestParam(required = false) Integer limit) {
+    public Result list(@RequestParam(required = false) Integer page,
+                       @RequestParam(required = false) Integer limit) {
 
         LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted,0);
-        if(page == null){
+        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
+        if (page == null) {
             page = 1;
         }
-        if(limit == null){
+        if (limit == null) {
             limit = 10;
         }
-        Page<BlogCategory> pageQuery = new Page<>((page-1)*page,limit);
+        Page<BlogCategory> pageQuery = new Page<>((page - 1) * page, limit);
 
-        IPage<BlogCategory> categoryIPage = categoryService.selectPage(pageQuery,lambdaQueryWrapper);
-        PageResult pageResult =  new PageResult(categoryIPage.getRecords(),
-                (int)categoryIPage.getTotal(),(int)categoryIPage.getSize(),(int)categoryIPage.getCurrent());
+        IPage<BlogCategory> categoryIPage = categoryService.selectPage(pageQuery, lambdaQueryWrapper);
+        PageResult pageResult = new PageResult(categoryIPage.getRecords(),
+                (int) categoryIPage.getTotal(), (int) categoryIPage.getSize(), (int) categoryIPage.getCurrent());
         return ResultGenerator.genSuccessResult(pageResult);
     }
 
@@ -62,8 +60,8 @@ public class CategoryController {
     public Result save(@RequestParam("categoryName") String categoryName,
                        @RequestParam("categoryIcon") String categoryIcon) {
         LambdaQueryWrapper<BlogCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(BlogCategory::getCategoryName,categoryName);
-        if(categoryService.getOne(queryWrapper) != null){
+        queryWrapper.eq(BlogCategory::getCategoryName, categoryName);
+        if (categoryService.getOne(queryWrapper) != null) {
             return ResultGenerator.genFailResult("分类名称重复");
         }
         BlogCategory blogCategory = new BlogCategory();
