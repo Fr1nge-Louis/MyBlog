@@ -10,7 +10,7 @@ import java.util.Properties;
 @Component
 public class KaptchaConfig {
     @Bean
-    public DefaultKaptcha getDefaultKaptcha(){
+    public DefaultKaptcha getDefaultKaptcha() {
         DefaultKaptcha defaultKaptcha = new DefaultKaptcha();
         Properties properties = new Properties();
         properties.put("kaptcha.border", "no");
