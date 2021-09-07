@@ -1,11 +1,11 @@
 package com.fr1nge.myblog.service;
 
-import com.fr1nge.myblog.entity.BlogTagRelation;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fr1nge.myblog.entity.BlogTagRelation;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author author
