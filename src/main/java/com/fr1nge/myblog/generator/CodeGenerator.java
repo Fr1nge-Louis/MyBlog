@@ -44,14 +44,11 @@ public class CodeGenerator {
      * 生成文件输出目录
      */
     private static final String outPutDir = "/src/main/java/com/fr1nge/myblog";
-
     private static final String packageController = "com.fr1nge.myblog.controller";
     private static final String packageEntity = "com.fr1nge.myblog.entity";
     private static final String packageService = "com.fr1nge.myblog.service";
     private static final String packageMapper = "com.fr1nge.myblog.dao";
     private static final String packageServiceImpl = "com.fr1nge.myblog.service.impl";
-
-
 
 
     /**
