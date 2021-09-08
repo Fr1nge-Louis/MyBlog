@@ -22,36 +22,27 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Value("${jwt.signing.key}")
     private String signingKey;
 
-    //这个方法是在访问接口之前执行的，我们只需要在这里写验证登陆状态的业务逻辑，就可以在用户调用指定接口之前验证登陆状态了
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
-        //每一个项目对于登陆的实现逻辑都有所区别，我这里使用最简单的Session提取User来验证登陆。
         HttpSession session = request.getSession();
-
-        //这里的token是登陆时放入session的
+        //获取session中的token
         String token = JwtUtil.getSubject(request, tokenName, signingKey);
 
-        log.info("请求路径：" + request.getRequestURI());
-
-        //如果session中没有user，表示没登陆
+        //token失效后，需要重新登陆
         if (token == null) {
-            //这个方法返回false表示忽略当前请求，如果一个用户调用了需要登陆才能使用的接口，如果他没有登陆这里会直接忽略掉
-            //当然你可以利用response给用户返回一些提示信息，告诉他没登陆
-            log.info("no session" + ",请求路径：" + request.getRequestURI());
+            //把session设置为失效
+            session.invalidate();
+            log.info("token is invalid" + ",请求路径：" + request.getRequestURI());
             response.sendRedirect("/admin/login");
             return false;
         } else {
-            log.info("has session" + ",请求路径：" + request.getRequestURI());
-            log.info("session=" + session.getAttribute("loginUser"));
+            log.info("token is valid" + ",请求路径：" + request.getRequestURI());
+            log.info("loginUser=" + session.getAttribute("loginUser"));
             log.info("create newToken begin");
             //更新token
             String newToken = JwtUtil.generateToken(signingKey, (String) session.getAttribute("loginUser"));
             session.setAttribute(tokenName, newToken);
             log.info("create newToken end");
-
-
-
-            return true;    //如果session里有user，表示该用户已经登陆，放行，用户即可继续调用自己需要的接口
+            return true;
         }
 
     }
