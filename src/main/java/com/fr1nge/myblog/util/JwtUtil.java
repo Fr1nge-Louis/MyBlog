@@ -23,8 +23,8 @@ public class JwtUtil {
                 .setIssuedAt(now)//时间点
                 .signWith(SignatureAlgorithm.HS256, signingKey)//加密方法和签名
                 .setExpiration(expireTime);
-        log.debug("token expireTime = " + expireTime);
-        log.debug("token = " + builder.compact());
+        log.info("token expireTime = " + expireTime);
+        log.info("token = " + builder.compact());
         return builder.compact();
     }
 

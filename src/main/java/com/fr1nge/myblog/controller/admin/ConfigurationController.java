@@ -13,6 +13,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,8 +25,11 @@ public class ConfigurationController {
 
     @GetMapping("/configurations")
     public String list(HttpServletRequest request) {
+        List<BlogConfig> blogConfigList = configService.list();
+        Map<String, String> configMap = blogConfigList.stream()
+                .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));
         request.setAttribute("path", "configurations");
-        request.setAttribute("configurations", configService.list());
+        request.setAttribute("configurations", configMap);
         return "admin/configuration";
     }
 
@@ -36,16 +41,28 @@ public class ConfigurationController {
                           @RequestParam(value = "websiteIcon", required = false) String websiteIcon) {
         List<BlogConfig> blogConfigList = new ArrayList<>();
         if (StringUtils.isNotBlank(websiteName)) {
-            blogConfigList.add(getByName("websiteName"));
+            BlogConfig blogConfig = getByName("websiteName", websiteName);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(websiteDescription)) {
-            blogConfigList.add(getByName("websiteDescription"));
+            BlogConfig blogConfig = getByName("websiteDescription", websiteDescription);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(websiteLogo)) {
-            blogConfigList.add(getByName("websiteLogo"));
+            BlogConfig blogConfig = getByName("websiteLogo", websiteLogo);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(websiteIcon)) {
-            blogConfigList.add(getByName("websiteIcon"));
+            BlogConfig blogConfig = getByName("websiteIcon", websiteIcon);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         boolean flag = true;
         if (!blogConfigList.isEmpty()) {
@@ -61,13 +78,22 @@ public class ConfigurationController {
                            @RequestParam(value = "yourEmail", required = false) String yourEmail) {
         List<BlogConfig> blogConfigList = new ArrayList<>();
         if (StringUtils.isNotBlank(yourAvatar)) {
-            blogConfigList.add(getByName("yourAvatar"));
+            BlogConfig blogConfig = getByName("yourAvatar", yourAvatar);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(yourName)) {
-            blogConfigList.add(getByName("yourName"));
+            BlogConfig blogConfig = getByName("yourName", yourName);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(yourEmail)) {
-            blogConfigList.add(getByName("yourEmail"));
+            BlogConfig blogConfig = getByName("yourEmail", yourEmail);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         boolean flag = true;
         if (!blogConfigList.isEmpty()) {
@@ -85,19 +111,34 @@ public class ConfigurationController {
                          @RequestParam(value = "footerPoweredByURL", required = false) String footerPoweredByURL) {
         List<BlogConfig> blogConfigList = new ArrayList<>();
         if (StringUtils.isNotBlank(footerAbout)) {
-            blogConfigList.add(getByName("footerAbout"));
+            BlogConfig blogConfig = getByName("footerAbout", footerAbout);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(footerICP)) {
-            blogConfigList.add(getByName("footerICP"));
+            BlogConfig blogConfig = getByName("footerICP", footerICP);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(footerCopyRight)) {
-            blogConfigList.add(getByName("footerCopyRight"));
+            BlogConfig blogConfig = getByName("footerCopyRight", footerCopyRight);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(footerPoweredBy)) {
-            blogConfigList.add(getByName("footerPoweredBy"));
+            BlogConfig blogConfig = getByName("footerPoweredBy", footerPoweredBy);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         if (StringUtils.isNotBlank(footerPoweredByURL)) {
-            blogConfigList.add(getByName("footerPoweredByURL"));
+            BlogConfig blogConfig = getByName("footerPoweredByURL", footerPoweredByURL);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
         }
         boolean flag = true;
         if (!blogConfigList.isEmpty()) {
@@ -108,13 +149,19 @@ public class ConfigurationController {
 
     /**
      * 通过配置名称获取其实体类
+     *
      * @param name 配置名称
      * @return BlogConfig
      */
-    private BlogConfig getByName(String name) {
+    private BlogConfig getByName(String name, String value) {
         LambdaQueryWrapper<BlogConfig> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BlogConfig::getConfigName, name);
-        return configService.getOne(queryWrapper);
+        BlogConfig blogConfig = configService.getOne(queryWrapper);
+        if (StringUtils.equals(blogConfig.getConfigValue(), value)) {
+            return null;
+        }
+        blogConfig.setConfigValue(value);
+        return blogConfig;
     }
 
 }

@@ -24,7 +24,7 @@ public class WebLogAspect {
     /**
      * 切入点
      */
-    @Pointcut("execution(public * com.fr1nge.myblog.controller.*.*(..)))")
+    @Pointcut("execution(public * com.fr1nge.myblog.controller..*(..))")
     public void weblog() {
 
     }
@@ -65,7 +65,6 @@ public class WebLogAspect {
     @AfterReturning(returning = "res", pointcut = "weblog()")
     public void doAfterReturning(Object res) {
         //处理完请求，返回内容
-        //new ObjectMapper()用于对象转json
         log.info("RESPONSE : " + JSONObject.toJSONString(res));
     }
 }

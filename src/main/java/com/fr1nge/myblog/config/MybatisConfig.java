@@ -16,7 +16,7 @@ public class MybatisConfig {
      */
     @Bean
     public PaginationInterceptor paginationInterceptor() {
-        log.debug("分页插件初始化完成");
+        log.info("分页插件初始化完成");
         return new PaginationInterceptor();
     }
 }

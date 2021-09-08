@@ -2,6 +2,7 @@ package com.fr1nge.myblog.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fr1nge.myblog.entity.AdminUser;
+import com.fr1nge.myblog.entity.BlogConfig;
 import com.fr1nge.myblog.service.*;
 import com.fr1nge.myblog.util.GetMD5;
 import com.fr1nge.myblog.util.JwtUtil;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -39,15 +43,21 @@ public class AdminController {
     private BlogTagService tagService;
     @Resource
     private BlogCommentService commentService;
+    @Resource
+    private BlogConfigService configService;
 
     @GetMapping({"/index"})
     public String index(HttpServletRequest request) {
+        List<BlogConfig> blogConfigList = configService.list();
+        Map<String, String> configMap = blogConfigList.stream()
+                .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));
         request.setAttribute("path", "index");
         request.setAttribute("categoryCount", categoryService.count());
         request.setAttribute("blogCount", blogService.count());
         request.setAttribute("linkCount", linkService.count());
         request.setAttribute("tagCount", tagService.count());
         request.setAttribute("commentCount", commentService.count());
+        request.setAttribute("configurations", configMap);
         return "admin/index";
     }
 
