@@ -7,9 +7,9 @@ import com.fr1nge.myblog.service.*;
 import com.fr1nge.myblog.util.GetMD5;
 import com.fr1nge.myblog.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -48,16 +48,12 @@ public class AdminController {
 
     @GetMapping({"/index"})
     public String index(HttpServletRequest request) {
-        List<BlogConfig> blogConfigList = configService.list();
-        Map<String, String> configMap = blogConfigList.stream()
-                .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));
         request.setAttribute("path", "index");
         request.setAttribute("categoryCount", categoryService.count());
         request.setAttribute("blogCount", blogService.count());
         request.setAttribute("linkCount", linkService.count());
         request.setAttribute("tagCount", tagService.count());
         request.setAttribute("commentCount", commentService.count());
-        request.setAttribute("configurations", configMap);
         return "admin/index";
     }
 
@@ -71,20 +67,27 @@ public class AdminController {
                         @RequestParam("password") String password,
                         @RequestParam("verifyCode") String verifyCode,
                         HttpSession session) {
-        String kaptchaCode = session.getAttribute("verifyCode") + "";
-        if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
-            session.setAttribute("errorMsg", "验证码错误");
-            return "admin/login";
-        }
+        String kaptchaCode = (String) session.getAttribute("verifyCode");
+//        if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
+//            session.setAttribute("errorMsg", "验证码错误");
+//            return "admin/login";
+//        }
         QueryWrapper<AdminUser> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(AdminUser::getLoginUserName, userName).eq(AdminUser::getLoginPassword, GetMD5.encryptString(password));
         AdminUser adminUser = adminUserService.getOne(wrapper);
         if (adminUser != null) {
+            //登陆成功，将信息储存到session
+            //储存用户信息
             session.setAttribute("loginUser", adminUser.getNickName());
             session.setAttribute("loginUserId", adminUser.getAdminUserId());
+            //储存token
             String token = JwtUtil.generateToken(signingKey, adminUser.getNickName());
-            log.info("token=" + token);
             session.setAttribute(tokenName, token);
+            //储存配置信息
+            List<BlogConfig> blogConfigList = configService.list();
+            Map<String, String> configMap = blogConfigList.stream()
+                    .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));
+            session.setAttribute("config", configMap);
             return "redirect:/admin/index";
         } else {
             session.setAttribute("errorMsg", "登陆失败");
@@ -94,9 +97,7 @@ public class AdminController {
 
     @GetMapping("/user/logout")
     public String logout(HttpServletRequest request) {
-        request.getSession().removeAttribute("loginUserId");
-        request.getSession().removeAttribute("loginUser");
-        request.getSession().removeAttribute("errorMsg");
+        request.getSession().invalidate();
         return "admin/login";
     }
 
@@ -123,16 +124,14 @@ public class AdminController {
         AdminUser adminUser = adminUserService.getById(loginUserId);
 
         //判断原来的密码是否正确
-        if (!adminUser.getLoginPassword().equals(GetMD5.encryptString(originalPassword))) {
+        if (StringUtils.equals(GetMD5.encryptString(originalPassword),adminUser.getLoginPassword())) {
             return "修改失败";
         }
         //修改密码
         adminUser.setLoginPassword(GetMD5.encryptString(newPassword));
         if (adminUserService.updateById(adminUser)) {
             //修改成功后清空session中的数据，前端控制跳转至登录页
-            request.getSession().removeAttribute("loginUserId");
-            request.getSession().removeAttribute("loginUser");
-            request.getSession().removeAttribute("errorMsg");
+            request.getSession().invalidate();
             return "success";
         } else {
             return "修改失败";
@@ -149,6 +148,8 @@ public class AdminController {
         AdminUser adminUser = adminUserService.getById(loginUserId);
         adminUser.setNickName(nickName).setLoginUserName(loginUserName);
         if (adminUserService.updateById(adminUser)) {
+            request.getSession().setAttribute("loginUser", adminUser.getNickName());
+            request.getSession().setAttribute("loginUserId", adminUser.getAdminUserId());
             return "success";
         } else {
             return "修改失败";

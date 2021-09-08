@@ -3,8 +3,11 @@ package com.fr1nge.myblog.controller.admin;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fr1nge.myblog.entity.Blog;
 import com.fr1nge.myblog.entity.BlogCategory;
+import com.fr1nge.myblog.entity.BlogLink;
 import com.fr1nge.myblog.service.BlogCategoryService;
+import com.fr1nge.myblog.service.BlogService;
 import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
 import com.fr1nge.myblog.util.ResultGenerator;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -21,6 +25,9 @@ public class CategoryController {
 
     @Resource
     private BlogCategoryService categoryService;
+
+    @Resource
+    private BlogService blogService;
 
     @GetMapping("/categories")
     public String categoryPage(HttpServletRequest request) {
@@ -96,10 +103,20 @@ public class CategoryController {
     @PostMapping(value = "/categories/delete")
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
-        if (ids.length < 1) {
-            return ResultGenerator.genFailResult("参数异常！");
+        LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        blogLambdaQueryWrapper.in(Blog::getBlogCategoryId, Arrays.asList(ids))
+                .eq(Blog::getIsDeleted,0);
+        List<Blog> blogList = blogService.list();
+        if(!blogList.isEmpty()){
+            return ResultGenerator.genFailResult("删除失败,该分类下有未删除的博客");
         }
-        if (categoryService.removeByIds(Arrays.asList(ids))) {
+        LambdaQueryWrapper<BlogCategory> categoryLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        categoryLambdaQueryWrapper.in(BlogCategory::getCategoryId, Arrays.asList(ids));
+        List<BlogCategory> blogCategoryList = categoryService.list(categoryLambdaQueryWrapper);
+        for (int i = 0; i < blogCategoryList.size(); i++) {
+            blogCategoryList.get(i).setIsDeleted(1);
+        }
+        if (categoryService.updateBatchById(blogCategoryList)) {
             return ResultGenerator.genSuccessResult();
         } else {
             return ResultGenerator.genFailResult("删除失败");

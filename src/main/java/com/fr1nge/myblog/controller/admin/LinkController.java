@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.awt.*;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -42,7 +45,7 @@ public class LinkController {
         }
         LambdaQueryWrapper<BlogLink> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BlogLink::getIsDeleted,0)
-                .orderByAsc(BlogLink::getLinkId);
+                .orderByAsc(BlogLink::getLinkRank);
         Page<BlogLink> pageQuery = new Page<>((page - 1) * page, limit);
         IPage<BlogLink> linkIPage = linkService.selectPage(pageQuery, queryWrapper);
         PageResult pageResult = new PageResult(linkIPage.getRecords(),
@@ -109,10 +112,13 @@ public class LinkController {
     @RequestMapping(value = "/links/delete", method = RequestMethod.POST)
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
-        LambdaUpdateWrapper<BlogLink> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(BlogLink::getLinkId, ids);
-        updateWrapper.set(BlogLink::getIsDeleted, 1);
-        if (linkService.update(updateWrapper)) {
+        LambdaQueryWrapper<BlogLink> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BlogLink::getLinkId, Arrays.asList(ids));
+        List<BlogLink> blogLinkList = linkService.list(queryWrapper);
+        for (int i = 0; i < blogLinkList.size(); i++) {
+            blogLinkList.get(i).setIsDeleted(1);
+        }
+        if (linkService.updateBatchById(blogLinkList)) {
             return ResultGenerator.genSuccessResult();
         } else {
             return ResultGenerator.genFailResult("删除失败");

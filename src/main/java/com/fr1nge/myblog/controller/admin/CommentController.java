@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -53,11 +55,13 @@ public class CommentController {
     @PostMapping("/comments/checkDone")
     @ResponseBody
     public Result checkDone(@RequestBody Integer[] ids) {
-        LambdaUpdateWrapper<BlogComment> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(BlogComment::getBlogId, ids);
-        updateWrapper.eq(BlogComment::getCommentStatus, 0);
-        updateWrapper.set(BlogComment::getCommentStatus, 1);
-        if (commentService.update(updateWrapper)) {
+        LambdaQueryWrapper<BlogComment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BlogComment::getCommentId, Arrays.asList(ids));
+        List<BlogComment> blogCommentList = commentService.list(queryWrapper);
+        for (int i = 0; i < blogCommentList.size(); i++) {
+            blogCommentList.get(i).setCommentStatus(1);
+        }
+        if (commentService.updateBatchById(blogCommentList)) {
             return ResultGenerator.genSuccessResult();
         } else {
             return ResultGenerator.genFailResult("审核失败");
@@ -80,10 +84,13 @@ public class CommentController {
     @PostMapping("/comments/delete")
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
-        LambdaUpdateWrapper<BlogComment> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(BlogComment::getBlogId, ids);
-        updateWrapper.set(BlogComment::getIsDeleted, 1);
-        if (commentService.update(updateWrapper)) {
+        LambdaQueryWrapper<BlogComment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(BlogComment::getCommentId, Arrays.asList(ids));
+        List<BlogComment> blogCommentList = commentService.list(queryWrapper);
+        for (int i = 0; i < blogCommentList.size(); i++) {
+            blogCommentList.get(i).setIsDeleted(1);
+        }
+        if (commentService.updateBatchById(blogCommentList)) {
             return ResultGenerator.genSuccessResult();
         } else {
             return ResultGenerator.genFailResult("刪除失败");

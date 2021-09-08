@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fr1nge.myblog.entity.Blog;
 import com.fr1nge.myblog.entity.BlogCategory;
+import com.fr1nge.myblog.entity.BlogLink;
 import com.fr1nge.myblog.service.BlogCategoryService;
 import com.fr1nge.myblog.service.BlogService;
 import com.fr1nge.myblog.util.PageResult;
@@ -185,10 +186,13 @@ public class BlogController {
     @PostMapping("/blogs/delete")
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
-        if (ids.length < 1) {
-            return ResultGenerator.genFailResult("参数异常！");
+        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Blog::getBlogId, Arrays.asList(ids));
+        List<Blog> blogList = blogService.list(queryWrapper);
+        for (int i = 0; i < blogList.size(); i++) {
+            blogList.get(i).setIsDeleted(1);
         }
-        if (blogService.removeByIds(Arrays.asList(ids))) {
+        if (blogService.updateBatchById(blogList)) {
             return ResultGenerator.genSuccessResult();
         } else {
             return ResultGenerator.genFailResult("删除失败");

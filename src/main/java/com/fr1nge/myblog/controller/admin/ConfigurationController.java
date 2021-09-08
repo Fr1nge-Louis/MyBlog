@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,6 +76,7 @@ public class ConfigurationController {
     @ResponseBody
     public Result userInfo(@RequestParam(value = "yourAvatar", required = false) String yourAvatar,
                            @RequestParam(value = "yourName", required = false) String yourName,
+                           @RequestParam(value = "yourCareer", required = false) String yourCareer,
                            @RequestParam(value = "yourEmail", required = false) String yourEmail) {
         List<BlogConfig> blogConfigList = new ArrayList<>();
         if (StringUtils.isNotBlank(yourAvatar)) {
@@ -85,6 +87,12 @@ public class ConfigurationController {
         }
         if (StringUtils.isNotBlank(yourName)) {
             BlogConfig blogConfig = getByName("yourName", yourName);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
+        }
+        if (StringUtils.isNotBlank(yourCareer)) {
+            BlogConfig blogConfig = getByName("yourCareer", yourCareer);
             if (blogConfig != null) {
                 blogConfigList.add(blogConfig);
             }
@@ -160,7 +168,7 @@ public class ConfigurationController {
         if (StringUtils.equals(blogConfig.getConfigValue(), value)) {
             return null;
         }
-        blogConfig.setConfigValue(value);
+        blogConfig.setConfigValue(value).setUpdateTime(new Date());
         return blogConfig;
     }
 

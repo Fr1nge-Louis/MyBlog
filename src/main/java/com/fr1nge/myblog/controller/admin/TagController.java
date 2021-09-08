@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fr1nge.myblog.entity.Blog;
+import com.fr1nge.myblog.entity.BlogLink;
 import com.fr1nge.myblog.entity.BlogTag;
+import com.fr1nge.myblog.service.BlogService;
 import com.fr1nge.myblog.service.BlogTagService;
 import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -23,6 +28,9 @@ public class TagController {
 
     @Resource
     private BlogTagService tagService;
+
+    @Resource
+    private BlogService blogService;
 
     @GetMapping("/tags")
     public String tagPage(HttpServletRequest request) {
@@ -43,7 +51,7 @@ public class TagController {
         LambdaQueryWrapper<BlogTag> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BlogTag::getIsDeleted, 0)
                 .orderByAsc(BlogTag::getTagId);
-        Page<BlogTag> pageQuery = new Page<>((page - 1) * page, limit);
+        Page<BlogTag> pageQuery = new Page<>((long) (page - 1) * page, limit);
         IPage<BlogTag> tagIPage = tagService.selectPage(pageQuery, queryWrapper);
         PageResult pageResult = new PageResult(tagIPage.getRecords(),
                 (int) tagIPage.getTotal(), (int) tagIPage.getSize(), (int) tagIPage.getCurrent());
@@ -69,13 +77,25 @@ public class TagController {
     @PostMapping("/tags/delete")
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
-        LambdaUpdateWrapper<BlogTag> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(BlogTag::getTagId, ids)
-                .set(BlogTag::getIsDeleted, 1);
-        if (tagService.update(updateWrapper)) {
+        LambdaQueryWrapper<BlogTag> tagLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        tagLambdaQueryWrapper.in(BlogTag::getTagId, Arrays.asList(ids));
+        List<BlogTag> blogTagList = tagService.list(tagLambdaQueryWrapper);
+        //检查是否有关联数据
+        for (BlogTag tag : blogTagList) {
+            LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            blogLambdaQueryWrapper.like(Blog::getBlogTags, tag.getTagName())
+                    .eq(Blog::getIsDeleted,0);
+            if(!blogService.list(blogLambdaQueryWrapper).isEmpty()){
+                return ResultGenerator.genFailResult("{"+tag.getTagName()+"},关联未删除的博客");
+            }
+        }
+        for (int i = 0; i < blogTagList.size(); i++) {
+            blogTagList.get(i).setIsDeleted(1);
+        }
+        if (tagService.updateBatchById(blogTagList)) {
             return ResultGenerator.genSuccessResult();
         } else {
-            return ResultGenerator.genFailResult("有关联数据请勿强行删除");
+            return ResultGenerator.genFailResult("删除失败");
         }
     }
 
