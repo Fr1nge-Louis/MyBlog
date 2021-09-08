@@ -57,8 +57,6 @@ public class WebLogAspect {
         if (os != null) {
             log.info("OS_NAME : " + os.getName());
         }
-
-
     }
 
     //返回时拦截

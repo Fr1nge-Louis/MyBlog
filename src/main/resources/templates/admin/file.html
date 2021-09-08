@@ -27,20 +27,17 @@
             <div class="container-fluid">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">博客管理</h3>
+                        <h3 class="card-title">文件管理</h3>
                     </div> <!-- /.card-body -->
                     <div class="card-body">
                         <div class="grid-btn">
-                            <button class="btn btn-success" onclick="addBlog()"><i
-                                    class="fa fa-plus"></i>&nbsp;新增
-                            </button>
-                            <button class="btn btn-info" onclick="editBlog()"><i
-                                    class="fa fa-edit"></i>&nbsp;修改
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteBlog()"><i
-                                    class="fa fa-trash-o"></i>&nbsp;删除
+                            <button class="btn btn-file" id="uploadImageBtn"><i
+                                    class="fa fa-upload"></i>&nbsp;上传图片
                             </button>&nbsp;&nbsp;
-                            <input type="text" placeholder="关键字(标题/分类)" id="keyword" class="form-control col-2">&nbsp;
+                            <button class="btn btn-file" id="uploadFileBtn"><i
+                                    class="fa fa-upload"></i>&nbsp;上传文件
+                            </button>&nbsp;&nbsp;
+                            <input type="text" placeholder="关键字(文件名)" id="keyword" class="form-control col-2">&nbsp;
                             <button class="btn btn-info" onclick="search()"><i
                                     class="fa fa-search"></i>&nbsp;搜索
                             </button>
@@ -52,6 +49,50 @@
                     </div><!-- /.card-body -->
                 </div>
             </div><!-- /.container-fluid -->
+            <div class="content">
+                <!-- 模态框（Modal） -->
+                <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                                <h6 class="modal-title" id="articleModalLabel"></h6>
+                            </div>
+                            <div class="modal-body">
+                                <form onsubmit="return false;">
+                                    <div class="form-group">
+                                        <div class="col-sm-4">
+<!--                                            <th:block th:if="${null == blog}">-->
+<!--                                                <img id="blogCoverImage" src="/admin/dist/img/img-upload.png"-->
+<!--                                                     style="height: 64px;width: 64px;">-->
+<!--                                            </th:block>-->
+                                            <th:block th:unless="${null == blog}">
+                                                <img id="blogCoverImage" th:src="${blog.blogCoverImage}"
+                                                     style="width:160px ;height: 120px;display:block;">
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="form-group">
+                                        <div class="col-sm-4">
+                                            <button class="btn btn-info" style="margin-bottom: 5px;" id="uploadCoverImage">
+                                                <i class="fa fa-picture-o"></i>&nbsp;上传封面
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" id="saveButton">确认</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal -->
+            </div>
+
         </div>
         <!-- /.content -->
     </div>
@@ -67,12 +108,11 @@
 <script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/admin/dist/js/adminlte.min.js}"></script>
-<!-- jqgrid -->
-<script th:src="@{/admin/plugins/jqgrid-5.5.2/jquery.jqGrid.min.js}"></script>
-<script th:src="@{/admin/plugins/jqgrid-5.5.2/grid.locale-cn.js}"></script>
 <!-- sweetalert -->
 <script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
+<!-- ajaxupload -->
+<script th:src="@{/admin/plugins/ajaxupload/ajaxupload.js}"></script>
 <script th:src="@{/admin/dist/js/public.js}"></script>
-<script th:src="@{/admin/dist/js/blog.js}"></script>
+<script th:src="@{/admin/dist/js/file.js}"></script>
 </body>
 </html>
