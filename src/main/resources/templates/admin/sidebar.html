@@ -3,9 +3,9 @@
 <aside th:fragment="sidebar-fragment(path)" class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a th:href="@{/admin/index}" class="brand-link">
-        <img th:src="@{/admin/dist/img/logo.png}" alt="ssm-cluster Logo" class="brand-image img-circle elevation-3"
+        <img th:src="@{${session.config.websiteLogo}}" alt="ssm-cluster Logo" class="brand-image img-circle elevation-3"
              style="opacity: .8">
-        <span class="brand-text font-weight-light">my blog</span>
+        <span class="brand-text font-weight-light" th:text="${session.config.websiteName}"></span>
     </a>
     <!-- Sidebar -->
     <div class="sidebar">
@@ -75,6 +75,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a th:href="@{/admin/files}" th:class="${path}=='files'?'nav-link active':'nav-link'">
+                        <i class="fa fa-file nav-icon" aria-hidden="true"></i>
+                        <p>
+                            文件管理
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a th:href="@{/admin/links}" th:class="${path}=='links'?'nav-link active':'nav-link'">
                         <i class="fa fa-heart nav-icon" aria-hidden="true"></i>
                         <p>
@@ -94,7 +102,7 @@
                     <a th:href="@{/admin/profile}"
                        th:class="${path}=='profile'?'nav-link active':'nav-link'">
                         <i class="fa fa-user-secret nav-icon"></i>
-                        <p>修改密码</p>
+                        <p>修改信息</p>
                     </a>
                 </li>
                 <li class="nav-item">
