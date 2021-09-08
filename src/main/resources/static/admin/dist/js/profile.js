@@ -13,9 +13,13 @@ $(function () {
                 data: params,
                 success: function (r) {
                     if (r == 'success') {
-                        alert('修改成功');
+                        swal("保存成功", {
+                            icon: "success",
+                        });
                     } else {
-                        alert('修改失败');
+                        swal("操作失败", {
+                            icon: "error",
+                        });
                         $("#updateUserNameButton").prop("disabled",false);
                     }
                 }
@@ -38,10 +42,14 @@ $(function () {
                 success: function (r) {
                     console.log(r);
                     if (r == 'success') {
-                        alert('修改成功');
+                        swal("保存成功", {
+                            icon: "success",
+                        });
                         window.location.href = '/admin/login';
                     } else {
-                        alert('修改失败');
+                        swal("操作失败", {
+                            icon: "error",
+                        });
                         $("#updatePasswordButton").attr("disabled",false);
                     }
                 }
