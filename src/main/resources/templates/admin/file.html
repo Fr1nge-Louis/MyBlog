@@ -2,14 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <header th:replace="admin/header::header-fragment"></header>
 <body class="hold-transition sidebar-mini">
-<style>
-    .ui-jqgrid tr.jqgrow td {
-        white-space: normal !important;
-        height: auto;
-        vertical-align: text-top;
-        padding-top: 2px;
-    }
-</style>
+<link th:href="@{/admin/plugins/editormd/css/editormd.css}" rel="stylesheet"/>
+<link th:href="@{/admin/plugins/tagsinput/jquery.tagsinput.css}" rel="stylesheet"/>
+<link th:href="@{/admin/plugins/select2/select2.css}" rel="stylesheet"/>
+<link th:href="@{/admin/plugins/bootstrap-fileinput-5.2.3/css/fileinput.css}" media="all" rel="stylesheet" type="text/css"/>
+<link th:href="@{/admin/plugins/bootstrap-fileinput-5.2.3/themes/explorer-fas/theme.css}" media="all" rel="stylesheet" type="text/css"/>
 <div class="wrapper">
     <!-- 引入页面头header-fragment -->
     <div th:replace="admin/header::header-nav"></div>
@@ -27,17 +24,14 @@
             <div class="container-fluid">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">文件管理</h3>
+                        <h3 class="card-title">博客管理</h3>
                     </div> <!-- /.card-body -->
                     <div class="card-body">
                         <div class="grid-btn">
-                            <button class="btn btn-file" id="uploadImageBtn"><i
-                                    class="fa fa-upload"></i>&nbsp;上传图片
-                            </button>&nbsp;&nbsp;
-                            <button class="btn btn-file" id="uploadFileBtn"><i
+                            <button class="btn btn-file" id="uploadImgBtn"><i
                                     class="fa fa-upload"></i>&nbsp;上传文件
                             </button>&nbsp;&nbsp;
-                            <input type="text" placeholder="关键字(文件名)" id="keyword" class="form-control col-2">&nbsp;
+                            <input type="text" placeholder="关键字(标题/分类)" id="keyword" class="form-control col-2">&nbsp;
                             <button class="btn btn-info" onclick="search()"><i
                                     class="fa fa-search"></i>&nbsp;搜索
                             </button>
@@ -49,52 +43,23 @@
                     </div><!-- /.card-body -->
                 </div>
             </div><!-- /.container-fluid -->
-            <div class="content">
-                <!-- 模态框（Modal） -->
-                <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                        aria-hidden="true">&times;</span></button>
-                                <h6 class="modal-title" id="articleModalLabel"></h6>
+        </div>
+        <div class="content">
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel">
+                <div class="modal-open">
+                    <div class="modal-content">
+                        <form enctype="multipart/form-data">
+                            <div class="file-loading">
+                                <input id="kv-explorer" type="file" multiple>
                             </div>
-                            <div class="modal-body">
-                                <form onsubmit="return false;">
-                                    <div class="form-group">
-                                        <div class="col-sm-4">
-<!--                                            <th:block th:if="${null == blog}">-->
-<!--                                                <img id="blogCoverImage" src="/admin/dist/img/img-upload.png"-->
-<!--                                                     style="height: 64px;width: 64px;">-->
-<!--                                            </th:block>-->
-                                            <th:block th:unless="${null == blog}">
-                                                <img id="blogCoverImage" th:src="${blog.blogCoverImage}"
-                                                     style="width:160px ;height: 120px;display:block;">
-                                            </th:block>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="form-group">
-                                        <div class="col-sm-4">
-                                            <button class="btn btn-info" style="margin-bottom: 5px;" id="uploadCoverImage">
-                                                <i class="fa fa-picture-o"></i>&nbsp;上传封面
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                                <button type="button" class="btn btn-primary" id="saveButton">确认</button>
-                            </div>
-                        </div>
+                            <br>
+                        </form>
                     </div>
                 </div>
-                <!-- /.modal -->
             </div>
-
+            <!-- /.modal -->
         </div>
-        <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->
     <!-- 引入页脚footer-fragment -->
@@ -110,9 +75,28 @@
 <script th:src="@{/admin/dist/js/adminlte.min.js}"></script>
 <!-- sweetalert -->
 <script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
-<!-- ajaxupload -->
-<script th:src="@{/admin/plugins/ajaxupload/ajaxupload.js}"></script>
 <script th:src="@{/admin/dist/js/public.js}"></script>
-<script th:src="@{/admin/dist/js/file.js}"></script>
+<!-- bootstrap-fileinput-5.2.3 -->
+<script th:src="@{/admin/plugins/bootstrap-fileinput-5.2.3/js/plugins/piexif.js}" type="text/javascript"></script>
+<script th:src="@{/admin/plugins/bootstrap-fileinput-5.2.3/js/plugins/sortable.js}" type="text/javascript"></script>
+<script th:src="@{/admin/plugins/bootstrap-fileinput-5.2.3/js/fileinput.js}" type="text/javascript"></script>
+<script th:src="@{/admin/plugins/bootstrap-fileinput-5.2.3/js/locales/zh.js}" type="text/javascript"></script>
+<script th:src="@{/admin/plugins/bootstrap-fileinput-5.2.3/themes/fas/theme.js}" type="text/javascript"></script>
+<script th:src="@{/admin/plugins/bootstrap-fileinput-5.2.3/themes/explorer-fas/theme.js}" type="text/javascript"></script>
+
 </body>
+<script>
+    $(document).ready(function () {
+        $("#kv-explorer").fileinput({
+            'language':'zh',
+            'theme': 'explorer-fa',
+            'uploadUrl': '#',
+            overwriteInitial: false,
+            initialPreviewAsData: true,
+        });
+    });
+    $('#uploadImgBtn').click(function () {
+        $('#articleModal').modal('show');
+    });
+</script>
 </html>
