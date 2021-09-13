@@ -20,7 +20,7 @@
             </div><!-- /.container-fluid -->
         </div>
         <!-- Main content -->
-        <div class="content">
+        <div class="content" id="tableDiv">
             <div class="container-fluid">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
@@ -29,36 +29,34 @@
                     <div class="card-body">
                         <div class="grid-btn">
                             <button class="btn btn-file" id="uploadImgBtn"><i
-                                    class="fa fa-upload"></i>&nbsp;上传文件
+                                    class="fa fa-upload" onclick="upload()"></i>&nbsp;上传文件
                             </button>&nbsp;&nbsp;
                             <input type="text" placeholder="关键字(标题/分类)" id="keyword" class="form-control col-2">&nbsp;
                             <button class="btn btn-info" onclick="search()"><i
                                     class="fa fa-search"></i>&nbsp;搜索
                             </button>
                         </div>
-                        <!-- JqGrid必要DOM,用于创建表格展示列表数据 -->
-                        <table id="jqGrid" class="table table-bordered"></table>
-                        <!-- JqGrid必要DOM,分页信息区域 -->
-                        <div id="jqGridPager"></div>
+                        <!-- 文件上传 -->
+                        <div id="uploadDiv">
+                            <form enctype="multipart/form-data">
+                                <div class="file-loading">
+                                    <input id="kv-explorer" name="file" type="file" multiple data-theme="fas">
+                                </div>
+                                <br>
+                            </form>
+                        </div>
+
+                        <div id="fileListDiv">
+                            <span>sdfsfsfsfsfsfsf</span>
+                            <!-- JqGrid必要DOM,用于创建表格展示列表数据 -->
+                            <table id="jqGrid" class="table table-bordered"></table>
+                            <!-- JqGrid必要DOM,分页信息区域 -->
+                            <div id="jqGridPager"></div>
+                        </div>
+
                     </div><!-- /.card-body -->
                 </div>
             </div><!-- /.container-fluid -->
-        </div>
-        <div class="content">
-            <!-- 模态框（Modal） -->
-            <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel">
-                <div class="modal-open">
-                    <div class="modal-content">
-                        <form enctype="multipart/form-data">
-                            <div class="file-loading">
-                                <input id="kv-explorer" type="file" multiple>
-                            </div>
-                            <br>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- /.modal -->
         </div>
     </div>
     <!-- /.content-wrapper -->
@@ -86,17 +84,38 @@
 
 </body>
 <script>
+    //文件上传
     $(document).ready(function () {
         $("#kv-explorer").fileinput({
             'language':'zh',
-            'theme': 'explorer-fa',
-            'uploadUrl': '#',
+            'uploadUrl': '/admin/upload/file',
             overwriteInitial: false,
             initialPreviewAsData: true,
+            maxFileSize: 512000,
+            maxFilesNum: 6
         });
     });
-    $('#uploadImgBtn').click(function () {
-        $('#articleModal').modal('show');
+
+    $("#kv-explorer").on("fileuploaded", function(event, file, previewId, index) {
+        //file.response 得到后台处理后的结果
+        //file.filescount 得到文件个数
+        //index 当前文件的下标
+        if (index === file.filescount-1 && file.response.resultCode === 200) {//当所有文件传输成功时
+            console.log(file.response);
+            //在这里执行文件全部上传成功的方法
+        }
     });
+
+    function upload(){
+        $("#fileListDiv").hide();
+        $("#uploadDiv").show();
+    }
+
+    function search(){
+        $("#uploadDiv").hide();
+        $("#fileListDiv").show();
+    }
+
+
 </script>
 </html>
