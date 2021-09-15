@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="admin/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<link th:href="@{/admin/plugins/fontawesome-5.15.4/css/all.css}" rel="stylesheet"/>
+<link th:href="@{/admin/plugins/bootstrap-icons-1.5.0/font/bootstrap-icons.css}" rel="stylesheet"/>
+<!-- jQuery -->
+<script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/admin/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/admin/dist/js/adminlte.min.js}"></script>
+<!-- jqgrid -->
+<script th:src="@{/admin/plugins/jqgrid-5.5.2/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/admin/plugins/jqgrid-5.5.2/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/admin/dist/js/public.js}"></script>
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+</style>
+<div class="wrapper">
+    <!-- 引入页面头header-fragment -->
+    <div th:replace="admin/header::header-nav"></div>
+    <!-- 引入工具栏sidebar-fragment -->
+    <div th:replace="admin/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">博客管理</h3>
+                    </div> <!-- /.card-body -->
+                    <div class="card-body">
+                        <div class="grid-btn">
+                            <button class="btn btn-info" onclick="editBlog()"><i
+                                    class="fa fa-edit"></i>&nbsp;修改
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteBlog()"><i
+                                    class="fa fa-trash-o"></i>&nbsp;删除
+                            </button>&nbsp;&nbsp;
+                            <input type="text" placeholder="关键字" id="keyword" class="form-control col-2">&nbsp;
+                            <button class="btn btn-info" onclick="search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索
+                            </button>
+                        </div>
+                        <!-- JqGrid必要DOM,用于创建表格展示列表数据 -->
+                        <table id="jqGrid" class="table table-bordered"></table>
+                        <!-- JqGrid必要DOM,分页信息区域 -->
+                        <div id="jqGridPager"></div>
+                    </div><!-- /.card-body -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="admin/footer::footer-fragment"></div>
+</div>
+
+</body>
+<script>
+    $(function () {
+        $("#jqGrid").jqGrid({
+            url: '/admin/file/list',
+            datatype: "json",
+            colModel: [
+                {label: 'id', name: 'fileId', index: 'fileId', width: 50, key: true, hidden: true},
+                {label: '文件名', name: 'fileName', index: 'fileName', width: 140},
+                {label: '文件路径', name: 'fileUrl', index: 'fileUrl', width: 120},
+                {label: '预览图', name: 'fileReqUrl', index: 'fileReqUrl', width: 120, formatter: coverImageFormatter},
+                {label: '浏览量', name: 'fileSize', index: 'fileSize', width: 60},
+                {label: '添加时间', name: 'createTime', index: 'createTime', width: 90}
+            ],
+            height: 700,
+            rowNum: 10,
+            rowList: [10, 20, 50],
+            styleUI: 'Bootstrap',
+            loadtext: '信息读取中...',
+            rownumbers: false,
+            rownumWidth: 20,
+            autowidth: true,
+            multiselect: true,
+            pager: "#jqGridPager",
+            jsonReader: {
+                root: "data.list",
+                page: "data.currPage",
+                total: "data.totalPage",
+                records: "data.totalCount"
+            },
+            prmNames: {
+                page: "page",
+                rows: "limit",
+                order: "order",
+            },
+            gridComplete: function () {
+                //隐藏grid底部滚动条
+                $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+            }
+        });
+
+
+
+        $(window).resize(function () {
+            $("#jqGrid").setGridWidth($(".card-body").width());
+        });
+
+        function coverImageFormatter(cellvalue) {
+            console.log(cellvalue);
+            return  "<img src='" + cellvalue + "' height=\"120\" width=\"160\" alt='coverImage' class='pic'/>";
+        }
+
+        $(".pic").click(function(){
+            $(this).css("width","100%");
+            $(this).css("height","100%");
+
+        });
+
+    });
+
+
+    /**
+     * 搜索功能
+     */
+    function search() {
+        //标题关键字
+        var keyword = $('#keyword').val();
+        if (!validLength(keyword, 20)) {
+            swal("搜索字段长度过大!", {
+                icon: "error",
+            });
+            return false;
+        }
+        //数据封装
+        var searchData = {keyword: keyword};
+        //传入查询条件参数
+        $("#jqGrid").jqGrid("setGridParam", {postData: searchData});
+        //点击搜索按钮默认都从第一页开始
+        $("#jqGrid").jqGrid("setGridParam", {page: 1});
+        //提交post并刷新表格
+        $("#jqGrid").jqGrid("setGridParam", {url: '/admin/file/list'}).trigger("reloadGrid");
+    }
+
+    /**
+     * jqGrid重新加载
+     */
+    function reload() {
+        var page = $("#jqGrid").jqGrid('getGridParam', 'page');
+        $("#jqGrid").jqGrid('setGridParam', {
+            page: page
+        }).trigger("reloadGrid");
+    }
+
+    function editBlog() {
+        var id = getSelectedRow();
+        if (id == null) {
+            return;
+        }
+        window.location.href = "/admin/blogs/edit/" + id;
+    }
+
+    function deleteBlog() {
+        var ids = getSelectedRows();
+        if (ids == null) {
+            return;
+        }
+        swal({
+            title: "确认弹框",
+            text: "确认要删除数据吗?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then((flag) => {
+                if (flag) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/admin/blogs/delete",
+                        contentType: "application/json",
+                        data: JSON.stringify(ids),
+                        success: function (r) {
+                            if (r.resultCode == 200) {
+                                swal("删除成功", {
+                                    icon: "success",
+                                });
+                                $("#jqGrid").trigger("reloadGrid");
+                            } else {
+                                swal(r.message, {
+                                    icon: "error",
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        );
+    }
+</script>
+
+</html>

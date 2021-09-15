@@ -1,19 +1,3 @@
-DROP TABLE IF EXISTS `jdbc_test`;
-
-CREATE TABLE `jdbc_test` (
-                             `type` varchar(100) DEFAULT NULL COMMENT '类型',
-                             `name` varchar(100) DEFAULT NULL COMMENT '名称'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-
-insert  into `jdbc_test`(`type`,`name`) values ('com.zaxxer.hikari.HikariDataSource','hikari数据源');
-insert  into `jdbc_test`(`type`,`name`) values ('org.apache.commons.dbcp2.BasicDataSource','dbcp2数据源');
-insert  into `jdbc_test`(`type`,`name`) values ('test','测试类');
-insert  into `jdbc_test`(`type`,`name`) values ('类别2','测试类2');
-
-
-
 DROP TABLE IF EXISTS `admin_user`;
 
 CREATE TABLE `admin_user` (
@@ -223,5 +207,18 @@ insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_desc
 insert  into `blog_link`(`link_id`,`link_type`,`link_name`,`link_url`,`link_description`,`link_rank`,`is_deleted`,`create_time`) values (19,2,'《玩转Spring Boot 系列》','https://www.shiyanlou.com/courses/1274','SpringBoot实战课程',20,0,'2019-04-24 16:10:30');
 
 
+DROP TABLE IF EXISTS `blog_file`;
+CREATE TABLE `blog_file` (
+                             `file_id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
+                             `file_name` varchar(200) DEFAULT NULL COMMENT '文件显示名称',
+                             `file_real_name` varchar(200) DEFAULT NULL COMMENT '文件真实名称',
+                             `file_url` varchar(200) DEFAULT NULL COMMENT '文件储存路径',
+                             `file_req_url` varchar(300) DEFAULT NULL COMMENT '文件请求路径',
+                             `file_size` bigint DEFAULT NULL COMMENT '文件大小',
+                             `file_md5` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件MD5',
+                             `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+
+                             PRIMARY KEY (`file_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

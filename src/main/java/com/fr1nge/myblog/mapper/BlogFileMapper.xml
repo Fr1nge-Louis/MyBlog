@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fr1nge.myblog.dao.BlogFileMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.fr1nge.myblog.entity.BlogFile">
+        <id column="file_id" property="fileId" />
+        <result column="file_name" property="fileName" />
+        <result column="file_real_name" property="fileRealName" />
+        <result column="file_url" property="fileUrl" />
+        <result column="file_req_url" property="fileReqUrl" />
+        <result column="file_size" property="fileSize" />
+        <result column="file_md5" property="fileMd5" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        file_id, file_name, file_real_name, file_url, file_req_url, file_size, file_md5, create_time
+    </sql>
+
+</mapper>

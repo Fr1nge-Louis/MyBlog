@@ -27,7 +27,7 @@
                 <li class="nav-header">Dashboard</li>
                 <li class="nav-item">
                     <a th:href="@{/admin/index}" th:class="${path}=='index'?'nav-link active':'nav-link'">
-                        <i class="nav-icon fa fa-dashboard"></i>
+                        <i class="nav-icon fa fa-tachometer-alt"></i>
                         <p>
                             Dashboard
                         </p>
@@ -35,7 +35,7 @@
                 </li>
                 <li class="nav-item">
                     <a th:href="@{/admin/blogs/edit}" th:class="${path}=='edit'?'nav-link active':'nav-link'">
-                        <i class="nav-icon fa fa fa-pencil-square-o"></i>
+                        <i class="nav-icon fa fa-pencil-alt"></i>
                         <p>
                             发布博客
                         </p>
@@ -75,14 +75,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a th:href="@{/admin/files}" th:class="${path}=='files'?'nav-link active':'nav-link'">
-                        <i class="fa fa-file nav-icon" aria-hidden="true"></i>
-                        <p>
-                            文件管理
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a th:href="@{/admin/links}" th:class="${path}=='links'?'nav-link active':'nav-link'">
                         <i class="fa fa-heart nav-icon" aria-hidden="true"></i>
                         <p>
@@ -92,22 +84,36 @@
                 </li>
                 <li class="nav-header">系统管理</li>
                 <li class="nav-item">
-                    <a th:href="@{/admin/configurations}"
-                       th:class="${path}=='configurations'?'nav-link active':'nav-link'">
+                    <a th:href="@{/admin/uploadFile}" th:class="${path}=='uploadFile'?'nav-link active':'nav-link'">
+                        <i class="fa fa-upload nav-icon" aria-hidden="true"></i>
+                        <p>
+                            文件上传
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/manageFile}" th:class="${path}=='manageFile'?'nav-link active':'nav-link'">
+                        <i class="fa fa-folder-open nav-icon" aria-hidden="true"></i>
+                        <p>
+                            文件管理
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/configurations}" th:class="${path}=='configurations'?'nav-link active':'nav-link'">
                         <i class="fa fa-wrench nav-icon"></i>
                         <p>系统配置</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a th:href="@{/admin/profile}"
-                       th:class="${path}=='profile'?'nav-link active':'nav-link'">
+                    <a th:href="@{/admin/profile}" th:class="${path}=='profile'?'nav-link active':'nav-link'">
                         <i class="fa fa-user-secret nav-icon"></i>
                         <p>修改信息</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a th:href="@{/admin/user/logout}" class="nav-link">
-                        <i class="fa fa-sign-out nav-icon"></i>
+                        <i class="fa fa-sign-out-alt nav-icon"></i>
                         <p>安全退出</p>
                     </a>
                 </li>
