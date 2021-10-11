@@ -1,26 +1,33 @@
 package com.fr1nge.myblog.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fr1nge.myblog.entity.Blog;
 import com.fr1nge.myblog.entity.BlogCategory;
-import com.fr1nge.myblog.entity.BlogLink;
+import com.fr1nge.myblog.entity.BlogTag;
+import com.fr1nge.myblog.entity.BlogTagRelation;
 import com.fr1nge.myblog.service.BlogCategoryService;
 import com.fr1nge.myblog.service.BlogService;
+import com.fr1nge.myblog.service.BlogTagRelationService;
+import com.fr1nge.myblog.service.BlogTagService;
 import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
 import com.fr1nge.myblog.util.ResultGenerator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-
+@Slf4j
 @Controller
 @RequestMapping("/admin")
 public class BlogController {
@@ -29,6 +36,10 @@ public class BlogController {
     private BlogService blogService;
     @Resource
     private BlogCategoryService categoryService;
+    @Resource
+    private BlogTagService tagService;
+    @Resource
+    private BlogTagRelationService tagRelationService;
 
     @GetMapping("/blogs/list")
     @ResponseBody
@@ -39,6 +50,7 @@ public class BlogController {
                        @RequestParam(required = false) Integer limit) {
 
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Blog::getIsDeleted, 0);
         if (StringUtils.isNotBlank(keyword)) {
             queryWrapper.like(Blog::getBlogTitle, keyword).or()
                     .like(Blog::getBlogCategoryName, keyword);
@@ -55,10 +67,10 @@ public class BlogController {
         if (limit == null) {
             limit = 10;
         }
-        Page<Blog> pageQuery = new Page<>((page - 1) * page, limit);
+        Page<Blog> pageQuery = new Page<>(page, limit);
         IPage<Blog> blogIPage = blogService.selectPage(pageQuery, queryWrapper);
         PageResult pageResult = new PageResult(blogIPage.getRecords(),
-                (int) blogIPage.getTotal(), (int) blogIPage.getSize(), (int) blogIPage.getCurrent());
+                (int) blogIPage.getTotal(), (int) blogIPage.getSize(), page);
         return ResultGenerator.genSuccessResult(pageResult);
 
     }
@@ -95,6 +107,7 @@ public class BlogController {
         return "admin/edit";
     }
 
+    @Transactional
     @PostMapping("/blogs/save")
     @ResponseBody
     public Result save(@RequestParam("blogTitle") String blogTitle,
@@ -105,23 +118,35 @@ public class BlogController {
                        @RequestParam("blogCoverImage") String blogCoverImage,
                        @RequestParam("blogStatus") Integer blogStatus,
                        @RequestParam("enableComment") Integer enableComment) {
-        Blog blog = new Blog()
-                .setBlogTitle(blogTitle)
-                .setBlogSubUrl(blogSubUrl)
-                .setBlogCategoryId(blogCategoryId)
-                .setBlogTags(blogTags)
-                .setBlogContent(blogContent)
-                .setBlogCoverImage(blogCoverImage)
-                .setBlogStatus(blogStatus)
-                .setEnableComment(enableComment);
 
-        if (blogService.save(blog)) {
-            return ResultGenerator.genSuccessResult("添加成功");
-        } else {
-            return ResultGenerator.genFailResult("添加失败");
+        String[] tags = blogTags.split(",");
+        if (tags.length > 6) {
+            return ResultGenerator.genFailResult("标签数量限制为6");
         }
+        try {
+            Blog blog = new Blog()
+                    .setBlogTitle(blogTitle)
+                    .setBlogSubUrl(blogSubUrl)
+                    .setBlogCategoryId(blogCategoryId)
+                    .setBlogTags(blogTags)
+                    .setBlogContent(blogContent)
+                    .setBlogCoverImage(blogCoverImage.trim())
+                    .setBlogStatus(blogStatus)
+                    .setEnableComment(enableComment);
+            if (!saveOrUpdateBlog(blog,null, tags)) {
+                throw new RuntimeException();
+            }
+            return ResultGenerator.genSuccessResult();
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            log.error("保存文章失败！");
+            return ResultGenerator.genFailResult("保存失败");
+        }
+
     }
 
+    @Transactional
     @PostMapping("/blogs/update")
     @ResponseBody
     public Result update(@RequestParam("blogId") Long blogId,
@@ -133,70 +158,174 @@ public class BlogController {
                          @RequestParam("blogCoverImage") String blogCoverImage,
                          @RequestParam("blogStatus") Integer blogStatus,
                          @RequestParam("enableComment") Integer enableComment) {
-        Blog blog = blogService.getById(blogId);
-        blog.setBlogTitle(blogTitle)
-                .setBlogSubUrl(blogSubUrl)
-                .setBlogCategoryId(blogCategoryId)
-                .setBlogTags(blogTags)
-                .setBlogContent(blogContent)
-                .setBlogCoverImage(blogCoverImage)
-                .setBlogStatus(blogStatus)
-                .setEnableComment(enableComment);
-        if (blogService.updateById(blog)) {
-            return ResultGenerator.genSuccessResult("修改成功");
-        } else {
+        String[] tags = blogTags.split(",");
+        if (tags.length > 6) {
+            return ResultGenerator.genFailResult("标签数量限制为6");
+        }
+        try {
+            Blog oldBlog = blogService.getById(blogId);
+            if (StringUtils.equals(blogTitle.trim(), oldBlog.getBlogTitle())
+                    && StringUtils.equals(blogSubUrl.trim(), oldBlog.getBlogSubUrl())
+                    && Objects.equals(blogCategoryId, oldBlog.getBlogCategoryId())
+                    && StringUtils.equals(blogTags.trim(), oldBlog.getBlogTags())
+                    && StringUtils.equals(blogContent, oldBlog.getBlogContent())
+                    && StringUtils.equals(blogCoverImage.trim(), oldBlog.getBlogCoverImage())
+                    && Objects.equals(blogStatus, oldBlog.getBlogStatus())
+                    && Objects.equals(enableComment, oldBlog.getEnableComment())) {
+                return ResultGenerator.genSuccessResult();
+            }
+
+            Blog newBlog = new Blog();
+            newBlog.setBlogId(blogId)
+                    .setBlogTitle(blogTitle.trim())
+                    .setBlogSubUrl(blogSubUrl.trim())
+                    .setBlogCategoryId(blogCategoryId)
+                    .setBlogCoverImage(blogCoverImage.trim())
+                    .setBlogContent(blogContent)
+                    .setBlogCategoryId(blogCategoryId)
+                    .setBlogCategoryName(oldBlog.getBlogCategoryName())
+                    .setBlogTags(blogTags.trim())
+                    .setBlogStatus(blogStatus)
+                    .setBlogViews(oldBlog.getBlogViews())
+                    .setEnableComment(enableComment)
+                    .setIsDeleted(oldBlog.getIsDeleted())
+                    .setCreateTime(oldBlog.getCreateTime())
+                    .setUpdateTime(new Date());
+            if (!saveOrUpdateBlog(newBlog,oldBlog, tags)) {
+                throw new RuntimeException();
+            }
+            return ResultGenerator.genSuccessResult();
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            log.error("修改文章失败！");
             return ResultGenerator.genFailResult("修改失败");
         }
+
     }
 
-//    @PostMapping("/blogs/md/uploadfile")
-//    public void uploadFileByEditormd(HttpServletRequest request,
-//                                     HttpServletResponse response,
-//                                     @RequestParam(name = "editormd-image-file", required = true)
-//                                             MultipartFile file) throws IOException, URISyntaxException {
-//        String fileName = file.getOriginalFilename();
-//        String suffixName = fileName.substring(fileName.lastIndexOf("."));
-//        //生成文件名称通用方法
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-//        Random r = new Random();
-//        StringBuilder tempName = new StringBuilder();
-//        tempName.append(sdf.format(new Date())).append(r.nextInt(100)).append(suffixName);
-//        String newFileName = tempName.toString();
-//        //创建文件
-//        File destFile = new File(Constants.FILE_UPLOAD_DIC + newFileName);
-//        String fileUrl = MyBlogUtils.getHost(new URI(request.getRequestURL() + "")) + "/upload/" + newFileName;
-//        File fileDirectory = new File(Constants.FILE_UPLOAD_DIC);
-//        try {
-//            if (!fileDirectory.exists()) {
-//                if (!fileDirectory.mkdir()) {
-//                    throw new IOException("文件夹创建失败,路径为：" + fileDirectory);
-//                }
-//            }
-//            file.transferTo(destFile);
-//            request.setCharacterEncoding("utf-8");
-//            response.setHeader("Content-Type", "text/html");
-//            response.getWriter().write("{\"success\": 1, \"message\":\"success\",\"url\":\"" + fileUrl + "\"}");
-//        } catch (UnsupportedEncodingException e) {
-//            response.getWriter().write("{\"success\":0}");
-//        } catch (IOException e) {
-//            response.getWriter().write("{\"success\":0}");
-//        }
-//    }
-
+    @Transactional
     @PostMapping("/blogs/delete")
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
-        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Blog::getBlogId, Arrays.asList(ids));
-        List<Blog> blogList = blogService.list(queryWrapper);
-        for (int i = 0; i < blogList.size(); i++) {
-            blogList.get(i).setIsDeleted(1);
-        }
-        if (blogService.updateBatchById(blogList)) {
+        try {
+            LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.in(Blog::getBlogId, Arrays.asList(ids));
+            List<Blog> blogList = blogService.list(queryWrapper);
+            for (int i = 0; i < blogList.size(); i++) {
+                blogList.get(i).setIsDeleted(1);
+            }
+            if (!blogService.updateBatchById(blogList)) {
+
+            }
+            if (!tagRelationService.removeByIds(Arrays.asList(ids))) {
+                throw new RuntimeException();
+            }
             return ResultGenerator.genSuccessResult();
-        } else {
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            log.error("删除文章失败！");
             return ResultGenerator.genFailResult("删除失败");
         }
     }
+
+    private boolean saveOrUpdateBlog(Blog newBlog, Blog oldBlog, String[] tags) {
+        //插入或者更新blog
+        BlogCategory blogCategory = categoryService.getById(newBlog.getBlogCategoryId());
+        newBlog.setBlogCategoryName(blogCategory.getCategoryName());
+        if (!blogService.saveOrUpdate(newBlog)) {
+            return false;
+        }
+
+        if(oldBlog != null && StringUtils.equals(newBlog.getBlogTags(),oldBlog.getBlogTags())){
+            return true;
+        }
+
+        //插入新的BlogTag
+        LambdaQueryWrapper<BlogTag> tagLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        tagLambdaQueryWrapper.in(BlogTag::getTagName, tags);
+        List<BlogTag> blogTagList = tagService.list(tagLambdaQueryWrapper);
+        List<BlogTag> saveTags = new ArrayList<>();
+        if (blogTagList.size() < tags.length) {
+            List<String> tagNameList = blogTagList.stream().map(e -> e.getTagName()).collect(Collectors.toList());
+            for (int i = 0; i < tags.length; i++) {
+                if (!tagNameList.contains(tags[i])) {
+                    BlogTag blogTag = new BlogTag();
+                    blogTag.setTagName(tags[i]);
+                    saveTags.add(blogTag);
+                }
+            }
+            if (!tagService.saveBatch(saveTags)) {
+                log.error("保存标签失败！");
+                return false;
+            }
+        }
+
+        //tagRelation
+        List<BlogTagRelation> blogTagRelations = new ArrayList<>();
+        //如果是修改blog，则需要删除或者插入tagRelation
+        if (oldBlog != null) {
+            if(!StringUtils.equals(newBlog.getBlogTags(),oldBlog.getBlogTags())) {
+                List<String> oldTagList = Arrays.asList(oldBlog.getBlogTags().split(","));
+                List<String> newTagList = Arrays.asList(tags);
+                List<String> saveTagList = new ArrayList<>();
+                List<String> delTagList = new ArrayList<>();
+                //newTagList中有，oldTagList没有，则是需要新增的
+                for (String tagName : newTagList) {
+                    if (!oldTagList.contains(tagName)) {
+                        saveTagList.add(tagName);
+                    }
+                }
+                //oldTagList中有，newTagList没有，则是需要删除的
+                for (String tagName : oldTagList) {
+                    if (!newTagList.contains(tagName)) {
+                        delTagList.add(tagName);
+                    }
+                }
+
+                //新增
+                if (saveTagList.size() > 0) {
+                    tagLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    tagLambdaQueryWrapper.in(BlogTag::getTagName, saveTagList);
+                    List<BlogTag> tagList = tagService.list(tagLambdaQueryWrapper);
+                    for (BlogTag blogTag : tagList) {
+                        BlogTagRelation blogTagRelation = new BlogTagRelation();
+                        blogTagRelation.setBlogId(newBlog.getBlogId()).setTagId(blogTag.getTagId());
+                        blogTagRelations.add(blogTagRelation);
+                    }
+                }
+                //删除
+                if (delTagList.size() > 0) {
+                    tagLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    tagLambdaQueryWrapper.in(BlogTag::getTagName, delTagList);
+                    List<BlogTag> tagList = tagService.list(tagLambdaQueryWrapper);
+                    List<Integer> ids = tagList.stream().map(e -> e.getTagId()).collect(Collectors.toList());
+
+                    LambdaUpdateWrapper<BlogTagRelation> tagRelationLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                    tagRelationLambdaUpdateWrapper.in(BlogTagRelation::getTagId, ids);
+                    tagRelationLambdaUpdateWrapper.eq(BlogTagRelation::getBlogId, newBlog.getBlogId());
+                    tagRelationService.remove(tagRelationLambdaUpdateWrapper);
+                }
+            }
+        }
+        //如果是新增blog
+        else {
+            for (BlogTag blogTag : saveTags) {
+                BlogTagRelation blogTagRelation = new BlogTagRelation();
+                blogTagRelation.setBlogId(newBlog.getBlogId()).setTagId(blogTag.getTagId());
+                blogTagRelations.add(blogTagRelation);
+            }
+        }
+        //TagRelation插入
+        if (blogTagRelations.size() > 0) {
+            if (!tagRelationService.saveBatch(blogTagRelations)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
 }

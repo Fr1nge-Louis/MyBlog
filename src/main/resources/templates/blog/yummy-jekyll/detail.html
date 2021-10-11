@@ -61,7 +61,7 @@
                                         <img th:src="@{${configurations.get('yourAvatar')}}"
                                              style="float: left;border-radius: 100px;width: 50px;">
                                         <div class="meta2">
-                                            <h4 th:text="${configurations.get('yourName')}">十三</h4>
+                                            <h4 th:text="${configurations.get('yourName')}">Fr1ng3</h4>
                                             <span class="date">
                                         回复时间： <th:block
                                                     th:text="${#dates.format(comment.replyCreateTime, 'yyyy-MM-dd HH:mm:ss')}"></th:block>
@@ -109,7 +109,7 @@
 
             </div>
         </div>
-        <th:block th:if="${blogDetailVO.enableComment==0}">
+        <th:block th:if="${blogDetailVO.enableComment==1}">
             <aside class="create-comment" id="create-comment">
                 <hr>
                 <h2><span class="octicon octicon-pencil"> 添加评论</span></h2>

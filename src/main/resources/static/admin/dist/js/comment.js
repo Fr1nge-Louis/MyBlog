@@ -42,10 +42,10 @@ $(function () {
     });
     function statusFormatter(cellvalue) {
         if (cellvalue == 0) {
-            return "<button type=\"button\" class=\"btn btn-block btn-secondary btn-sm\" style=\"width: 80%;\">待审核</button>";
+            return "<span class=\"badge badge-secondary\">待审核</span>";
         }
         else if (cellvalue == 1) {
-            return "<button type=\"button\" class=\"btn btn-block btn-success btn-sm\" style=\"width: 80%;\">已审核</button>";
+            return "<span class=\"badge badge-success\">已审核</span>";
         }
     }
 

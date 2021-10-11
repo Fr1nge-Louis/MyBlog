@@ -11,12 +11,13 @@
         <result column="file_req_url" property="fileReqUrl" />
         <result column="file_size" property="fileSize" />
         <result column="file_md5" property="fileMd5" />
+        <result column="file_type" property="fileType" />
         <result column="create_time" property="createTime" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        file_id, file_name, file_real_name, file_url, file_req_url, file_size, file_md5, create_time
+        file_id, file_name, file_real_name, file_url, file_req_url, file_size, file_md5, file_type, create_time
     </sql>
 
 </mapper>

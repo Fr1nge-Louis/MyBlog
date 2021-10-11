@@ -4,11 +4,9 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <!-- Favicon Icon -->
-    <link rel="shortcut icon" href="../blog/assets/images/favicon.png"/>
-    <title th:text="|${configurations.get('websiteName')} - ${pageName}|">13blog.site My Blog
-    </title>
     <meta name="description" th:content="${configurations.get('websiteDescription')}">
+    <!-- Favicon Icon -->
+    <title th:text="|${configurations.get('websiteName')} - ${pageName}|">My Blog</title>
     <link rel="shortcut icon" th:href="@{${configurations.get('websiteIcon')}}"/>
     <link rel="stylesheet" th:href="@{/blog/yummy-jekyll/plugins/jquery/dist/jquery.min.js}">
     <script type="application/javascript" th:src="@{/blog/yummy-jekyll/plugins/jquery/dist/jquery.min.js}"></script>
@@ -32,7 +30,7 @@
 <header class="site-header">
     <div class="container">
         <a id="site-header-brand" href="/" title="personal blog">
-            <span class="octicon octicon-rocket" th:text="| ${configurations.get('websiteName')}|"></span>
+            <span class="octicon octicon-bookmark" th:text="| ${configurations.get('websiteName')}|"></span>
         </a>
         <nav class="site-header-nav" role="navigation">
             <a th:href="@{/index}" class=" site-header-nav-item hvr-underline-from-center">
@@ -47,7 +45,7 @@
             <a th:href="@{/about}" class=" site-header-nav-item hvr-underline-from-center">
                 About
             </a>
-            <a href="https://github.com/ZHENFENG13" class=" site-header-nav-item hvr-underline-from-center" target="_blank">
+            <a href="https://github.com/fr1nge333" class=" site-header-nav-item hvr-underline-from-center" target="_blank">
                 GitHub
             </a>
         </nav>

@@ -4,6 +4,7 @@
 <body class="hold-transition sidebar-mini">
 <link th:href="@{/admin/plugins/fontawesome-5.15.4/css/all.css}" rel="stylesheet"/>
 <link th:href="@{/admin/plugins/bootstrap-icons-1.5.0/font/bootstrap-icons.css}" rel="stylesheet"/>
+<link th:href="@{/admin/plugins/bootstrap/css/glyphicon.css}" rel="stylesheet"/>
 <!-- jQuery -->
 <script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -18,14 +19,7 @@
 <!-- sweetalert -->
 <script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
 <script th:src="@{/admin/dist/js/public.js}"></script>
-<style>
-    .ui-jqgrid tr.jqgrow td {
-        white-space: normal !important;
-        height: auto;
-        vertical-align: text-top;
-        padding-top: 2px;
-    }
-</style>
+
 <div class="wrapper">
     <!-- 引入页面头header-fragment -->
     <div th:replace="admin/header::header-nav"></div>
@@ -43,17 +37,11 @@
             <div class="container-fluid">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">博客管理</h3>
+                        <h3 class="card-title">文件管理</h3>
                     </div> <!-- /.card-body -->
                     <div class="card-body">
                         <div class="grid-btn">
-                            <button class="btn btn-info" onclick="editBlog()"><i
-                                    class="fa fa-edit"></i>&nbsp;修改
-                            </button>
-                            <button class="btn btn-danger" onclick="deleteBlog()"><i
-                                    class="fa fa-trash-o"></i>&nbsp;删除
-                            </button>&nbsp;&nbsp;
-                            <input type="text" placeholder="关键字" id="keyword" class="form-control col-2">&nbsp;
+                            <input type="text" placeholder="关键字" id="keyword" class="form-control col-5">&nbsp;
                             <button class="btn btn-info" onclick="search()"><i
                                     class="fa fa-search"></i>&nbsp;搜索
                             </button>
@@ -81,11 +69,12 @@
             datatype: "json",
             colModel: [
                 {label: 'id', name: 'fileId', index: 'fileId', width: 50, key: true, hidden: true},
-                {label: '文件名', name: 'fileName', index: 'fileName', width: 140},
+                {label: '文件名称', name: 'fileName', index: 'fileName', width: 140,editable:true},
                 {label: '文件路径', name: 'fileUrl', index: 'fileUrl', width: 120},
-                {label: '预览图', name: 'fileReqUrl', index: 'fileReqUrl', width: 120, formatter: coverImageFormatter},
-                {label: '浏览量', name: 'fileSize', index: 'fileSize', width: 60},
-                {label: '添加时间', name: 'createTime', index: 'createTime', width: 90}
+                {label: '文件预览', name: 'fileReqUrl', index: 'fileReqUrl', width: 120, formatter: imageFormatter},
+                {label: '文件大小', name: 'fileSize', index: 'fileSize', width: 100, formatter: fileSizeFormatter},
+                {label: '文件类型', name: 'fileType', index: 'fileType', width: 50, hidden: true},
+                {label: '添加时间', name: 'createTime', index: 'createTime', width: 100}
             ],
             height: 700,
             rowNum: 10,
@@ -95,7 +84,7 @@
             rownumbers: false,
             rownumWidth: 20,
             autowidth: true,
-            multiselect: true,
+            multiselect: false,
             pager: "#jqGridPager",
             jsonReader: {
                 root: "data.list",
@@ -111,25 +100,82 @@
             gridComplete: function () {
                 //隐藏grid底部滚动条
                 $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+            },
+            ondblClickRow: function (id) {
+                var rowData = $('#jqGrid').jqGrid('getRowData',id);
+                $('#jqGrid').jqGrid('editRow',id,{
+                    keys : true,        //这里按[enter]保存
+                    url: "/admin/file/update/name",
+                    mtype : "POST",
+                    restoreAfterError: true,
+                    extraparam: {
+                        "fileId": rowData.id
+                    },
+                    // oneditfunc: function(rowid){
+                    //     console.log(rowid);
+                    // },
+                    // onEnter: function (rowid){
+                    //     console.log("onenter"+rowid);
+                    //
+                    //     console.log("onenter"+rowid);
+                    //     return false;
+                    // },
+                    successfunc: function(response){
+                        console.log("成功");
+                        console.log(response);
+
+                        swal(response.responseJSON.message, {
+                            icon: "success",
+                        });
+                        return true;
+                    },
+                    errorfunc: function(rowid, response){
+                        console.log("失败");
+                        console.log(response);
+                        swal(response.responseJSON.message, {
+                            icon: "error",
+                        });
+                        return false;
+                    }
+                });
             }
+
+
         });
-
-
 
         $(window).resize(function () {
             $("#jqGrid").setGridWidth($(".card-body").width());
         });
 
-        function coverImageFormatter(cellvalue) {
-            console.log(cellvalue);
-            return  "<img src='" + cellvalue + "' height=\"120\" width=\"160\" alt='coverImage' class='pic'/>";
+        function imageFormatter(cellvalue, options, row) {
+            // console.log(row);
+            // console.log(row["fileName"]);
+            // console.log(row["createTime"]);
+            // console.log(options);
+            // console.log(cellvalue);
+            var str;
+            if (row["fileType"] === "1") {
+                str = "<img src='" + cellvalue + "' height=\"120\" width=\"160\" alt='coverImage'/>";
+            } else {
+                str = "<a href='" + cellvalue + "' download='" + row["fileName"] + "'>" + "下载" + "</a>";
+            }
+            return str;
         }
 
-        $(".pic").click(function(){
-            $(this).css("width","100%");
-            $(this).css("height","100%");
+        function fileSizeFormatter(cellvalue) {
+            if (cellvalue <= 1024) {
+                return cellvalue + " B";
+            }
 
-        });
+            if (cellvalue > 1024 && cellvalue < 1048576) {
+                return Math.round(cellvalue / 1024.00) + " KB";
+            }
+
+            if (cellvalue > 1048576) {
+                return Math.round(cellvalue / 1048576.00) + " MB";
+            }
+
+        }
 
     });
 
@@ -164,50 +210,6 @@
         $("#jqGrid").jqGrid('setGridParam', {
             page: page
         }).trigger("reloadGrid");
-    }
-
-    function editBlog() {
-        var id = getSelectedRow();
-        if (id == null) {
-            return;
-        }
-        window.location.href = "/admin/blogs/edit/" + id;
-    }
-
-    function deleteBlog() {
-        var ids = getSelectedRows();
-        if (ids == null) {
-            return;
-        }
-        swal({
-            title: "确认弹框",
-            text: "确认要删除数据吗?",
-            icon: "warning",
-            buttons: true,
-            dangerMode: true,
-        }).then((flag) => {
-                if (flag) {
-                    $.ajax({
-                        type: "POST",
-                        url: "/admin/blogs/delete",
-                        contentType: "application/json",
-                        data: JSON.stringify(ids),
-                        success: function (r) {
-                            if (r.resultCode == 200) {
-                                swal("删除成功", {
-                                    icon: "success",
-                                });
-                                $("#jqGrid").trigger("reloadGrid");
-                            } else {
-                                swal(r.message, {
-                                    icon: "error",
-                                });
-                            }
-                        }
-                    });
-                }
-            }
-        );
     }
 </script>
 

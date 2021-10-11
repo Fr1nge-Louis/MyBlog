@@ -1,13 +1,9 @@
 package com.fr1nge.myblog.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
 
 public class GetMD5 {
     public static String encryptString(String password) {
@@ -53,5 +49,4 @@ public class GetMD5 {
         }
         return md5str.toString().toUpperCase();
     }
-
 }

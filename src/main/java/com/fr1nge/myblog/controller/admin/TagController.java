@@ -51,10 +51,10 @@ public class TagController {
         LambdaQueryWrapper<BlogTag> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BlogTag::getIsDeleted, 0)
                 .orderByAsc(BlogTag::getTagId);
-        Page<BlogTag> pageQuery = new Page<>((long) (page - 1) * page, limit);
+        Page<BlogTag> pageQuery = new Page<>(page, limit);
         IPage<BlogTag> tagIPage = tagService.selectPage(pageQuery, queryWrapper);
         PageResult pageResult = new PageResult(tagIPage.getRecords(),
-                (int) tagIPage.getTotal(), (int) tagIPage.getSize(), (int) tagIPage.getCurrent());
+                (int) tagIPage.getTotal(), (int) tagIPage.getSize(), page);
         return ResultGenerator.genSuccessResult(pageResult);
     }
 

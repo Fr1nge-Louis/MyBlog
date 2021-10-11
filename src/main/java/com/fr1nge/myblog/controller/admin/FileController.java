@@ -1,5 +1,6 @@
 package com.fr1nge.myblog.controller.admin;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -59,6 +61,91 @@ public class FileController {
     @ResponseBody
     public Result upload(HttpServletResponse response, @RequestParam("file") MultipartFile file) {
         try {
+            Result resultSuccess = ResultGenerator.genSuccessResult();
+            resultSuccess.setData(saveFile(file));
+            return resultSuccess;
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("文件上传失败");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return ResultGenerator.genFailResult("文件上传失败");
+        }
+    }
+
+    @Transactional
+    @PostMapping("/upload/mdpic")
+    @ResponseBody
+    public JSONObject uploadFileByEditormd(HttpServletResponse response,
+                                           @RequestParam(name = "editormd-image-file") MultipartFile file) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("success", 1);
+            json.put("message", "上传成功");
+            json.put("url", saveFile(file));
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("文件上传失败");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            json.put("success", 0);
+        }
+        return json;
+    }
+
+
+    @GetMapping("/file/list")
+    @ResponseBody
+    public Result listFile(@RequestParam(required = false) Integer page,
+                           @RequestParam(required = false) Integer limit,
+                           @RequestParam(required = false) String keyword) {
+
+        LambdaQueryWrapper<BlogFile> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByAsc(BlogFile::getCreateTime);//通过时间排序
+        if (StringUtils.isNotBlank(keyword)) {
+            queryWrapper.like(BlogFile::getFileName, keyword).or()
+                    .like(BlogFile::getFileUrl, keyword);
+        }
+        if (page == null) {
+            page = 1;
+        }
+        if (limit == null) {
+            limit = 10;
+        }
+        Page<BlogFile> pageQuery = new Page<>(page, limit);
+        IPage<BlogFile> fileIPage = fileService.selectPage(pageQuery, queryWrapper);
+        List<BlogFile> blogFileList = fileIPage.getRecords();
+        for (int i = 0; i < blogFileList.size(); i++) {
+            blogFileList.get(i).setFileReqUrl(hostname + blogFileList.get(i).getFileRealName());
+        }
+
+        PageResult pageResult = new PageResult(blogFileList, (int) fileIPage.getTotal(),
+                (int) fileIPage.getSize(), page);
+        return ResultGenerator.genSuccessResult(pageResult);
+    }
+
+    @PostMapping("/file/update/name")
+    @ResponseBody
+    public Result updateName(@RequestParam Integer fileId,
+                             @RequestParam String fileName,
+                             HttpServletResponse response) {
+        BlogFile blogFile = fileService.getById(fileId);
+        if (blogFile == null) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return ResultGenerator.genFailResult("修改失败");
+        }
+        if (!StringUtils.equals(fileName, blogFile.getFileName())) {
+            blogFile.setFileName(fileName);
+            boolean flag = fileService.updateById(blogFile);
+            if (!flag) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return ResultGenerator.genFailResult("修改失败");
+            }
+        }
+        return ResultGenerator.genSuccessResult();
+    }
+
+
+    private String saveFile(MultipartFile file) throws IOException, NoSuchAlgorithmException {
+        try {
             //获取文件md5
             String fileMD5 = GetMD5.encryptFile(file.getInputStream());
             LambdaQueryWrapper<BlogFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -66,9 +153,7 @@ public class FileController {
             BlogFile blogFile = fileService.getOne(lambdaQueryWrapper);
             if (blogFile != null) {
                 log.info("该文件已存在,url=" + blogFile.getFileUrl());
-                Result result = ResultGenerator.genSuccessResult();
-                result.setData(hostname+blogFile.getFileRealName());
-                return result;
+                return hostname + blogFile.getFileRealName();
             }
 
             //生成文件名称通用方法
@@ -89,6 +174,12 @@ public class FileController {
                     .setFileRealName(newFileName)
                     .setFileUrl(fileDir + newFileName)
                     .setCreateTime(now);
+            //判断文件类型
+            if (StringUtils.contains(".gif.png.jpg.jpeg.bmp.webp", suffixName)) {
+                blogFile.setFileType("1");
+            } else {
+                blogFile.setFileType("2");
+            }
             boolean flag = fileService.save(blogFile);
             if (!flag) {
                 log.error("DB记录文件失败");
@@ -104,46 +195,14 @@ public class FileController {
                 }
             }
             file.transferTo(destFile);
-            Result resultSuccess = ResultGenerator.genSuccessResult();
-            resultSuccess.setData(hostname+newFileName);
-            return resultSuccess;
+            //返回文件路径
+            return hostname + newFileName;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             log.error("文件上传失败");
-            response.setStatus(500);
-            return ResultGenerator.genFailResult("文件上传失败");
+            throw e;
         }
-    }
-
-
-    @GetMapping("/file/list")
-    @ResponseBody
-    public Result listFile(@RequestParam(required = false) Integer page,
-                           @RequestParam(required = false) Integer limit,
-                           @RequestParam(required = false) String keyword) {
-
-        LambdaQueryWrapper<BlogFile> queryWrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(keyword)) {
-            queryWrapper.like(BlogFile::getFileName, keyword).or()
-                    .like(BlogFile::getFileUrl, keyword);
-        }
-        if (page == null) {
-            page = 1;
-        }
-        if (limit == null) {
-            limit = 10;
-        }
-        Page<BlogFile> pageQuery = new Page<>((page - 1) * page, limit);
-        IPage<BlogFile> fileIPage = fileService.selectPage(pageQuery, queryWrapper);
-        List<BlogFile> blogFileList = fileIPage.getRecords();
-        for (int i = 0; i < blogFileList.size(); i++) {
-            blogFileList.get(i).setFileReqUrl(hostname+blogFileList.get(i).getFileRealName());
-        }
-
-        PageResult pageResult = new PageResult(blogFileList, (int) fileIPage.getTotal(),
-                (int) fileIPage.getSize(), (int) fileIPage.getCurrent());
-        return ResultGenerator.genSuccessResult(pageResult);
     }
 
 

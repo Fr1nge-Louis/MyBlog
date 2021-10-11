@@ -45,10 +45,10 @@ public class CommentController {
         if (limit == null) {
             limit = 10;
         }
-        Page<BlogComment> pageQuery = new Page<>((page - 1) * page, limit);
+        Page<BlogComment> pageQuery = new Page<>(page, limit);
         IPage<BlogComment> commentIPage = commentService.selectPage(pageQuery, queryWrapper);
         PageResult pageResult = new PageResult(commentIPage.getRecords(),
-                (int) commentIPage.getTotal(), (int) commentIPage.getSize(), (int) commentIPage.getCurrent());
+                (int) commentIPage.getTotal(), (int) commentIPage.getSize(), page);
         return ResultGenerator.genSuccessResult(pageResult);
     }
 

@@ -19,68 +19,37 @@ $(function () {
         /**图片上传配置*/
         imageUpload: true,
         imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"], //图片上传格式
-        imageUploadURL: "/admin/blogs/md/uploadfile",
+        imageUploadURL: "/admin/upload/mdpic",
         onload: function (obj) { //上传成功之后的回调
+
         }
     });
 
-    // 编辑器粘贴上传
-    document.getElementById("blog-editormd").addEventListener("paste", function (e) {
-        var clipboardData = e.clipboardData;
-        if (clipboardData) {
-            var items = clipboardData.items;
-            if (items && items.length > 0) {
-                for (var item of items) {
-                    if (item.type.startsWith("image/")) {
-                        var file = item.getAsFile();
-                        if (!file) {
-                            alert("请上传有效文件");
-                            return;
-                        }
-                        var formData = new FormData();
-                        formData.append('file', file);
-                        var xhr = new XMLHttpRequest();
-                        xhr.open("POST", "/admin/upload/file");
-                        xhr.onreadystatechange = function () {
-                            if (xhr.readyState == 4 && xhr.status == 200) {
-                                var json=JSON.parse(xhr.responseText);
-                                if (json.resultCode == 200) {
-                                    blogEditor.insertValue("![](" + json.data + ")");
-                                } else {
-                                    alert("上传失败");
-                                }
-                            }
-                        }
-                        xhr.send(formData);
-                    }
-                }
-            }
+    $("#kv-explorer").fileinput({
+        'language':'zh',
+        'uploadUrl': '/admin/upload/file',
+        showPreview:false,
+        dropZoneEnabled: false,
+        maxFileSize: 102400
+    });
+
+    $("#kv-explorer").on("fileuploaded", function(event, file, previewId, index) {
+        //file.response 得到后台处理后的结果
+        //file.filescount 得到文件个数
+        //index 当前文件的下标
+        console.log(event);
+        console.log(previewId);
+        console.log(file.response);
+        if (index === file.filescount-1 && file.response.resultCode === 200) {//当所有文件传输成功时
+            //在这里执行文件全部上传成功的方法
+            console.log(file.response.data);
+            $('#blogCoverImage').val(file.response.data);
         }
     });
 
-    new AjaxUpload('#uploadCoverImage', {
-        action: '/admin/upload/file',
-        name: 'file',
-        autoSubmit: true,
-        responseType: "json",
-        onSubmit: function (file, extension) {
-            if (!(extension && /^(jpg|jpeg|png|gif)$/.test(extension.toLowerCase()))) {
-                alert('只支持jpg、png、gif格式的文件！');
-                return false;
-            }
-        },
-        onComplete: function (file, r) {
-            if (r != null && r.resultCode == 200) {
-                $("#blogCoverImage").attr("src", r.data);
-                $("#blogCoverImage").attr("style", "width: 128px;height: 128px;display:block;");
-                return false;
-            } else {
-                alert("error");
-            }
-        }
-    });
 });
 
+//保存按钮
 $('#confirmButton').click(function () {
     var blogTitle = $('#blogName').val();
     var blogSubUrl = $('#blogSubUrl').val();
@@ -135,25 +104,29 @@ $('#confirmButton').click(function () {
         });
         return;
     }
-    $('#articleModal').modal('show');
-});
 
-$('#saveButton').click(function () {
+    var arr =new Array();
+    arr = blogTags.split(',');
+    console.log(arr);
+    console.log(arr.length);
+    if (arr.length>6) {
+        swal("标签数量限制为6", {
+            icon: "error",
+        });
+        return;
+    }
     var blogId = $('#blogId').val();
     var blogTitle = $('#blogName').val();
     var blogSubUrl = $('#blogSubUrl').val();
     var blogCategoryId = $('#blogCategoryId').val();
     var blogTags = $('#blogTags').val();
     var blogContent = blogEditor.getMarkdown();
-    var blogCoverImage = $('#blogCoverImage')[0].src;
-    var blogStatus = $("input[name='blogStatus']:checked").val();
-    var enableComment = $("input[name='enableComment']:checked").val();
-    if (isNull(blogCoverImage) || blogCoverImage.indexOf('img-upload') != -1) {
-        swal("封面图片不能为空", {
-            icon: "error",
-        });
-        return;
-    }
+    var blogCoverImage = $('#blogCoverImage').val();
+    var blogStatus = $("#blogStatus option:selected").val();
+    var enableComment = $("#enableComment option:selected").val();
+
+    console.log("提交，状态 和 评论"+blogStatus+","+enableComment);
+
     var url = '/admin/blogs/save';
     var swlMessage = '保存成功';
     var data = {
@@ -202,7 +175,6 @@ $('#saveButton').click(function () {
                     icon: "error",
                 });
             }
-            ;
         },
         error: function () {
             swal("操作失败", {
@@ -212,15 +184,28 @@ $('#saveButton').click(function () {
     });
 });
 
+//取消的方法
 $('#cancelButton').click(function () {
     window.location.href = "/admin/blogs";
 });
 
-/**
- * 随机封面功能
- */
-$('#randomCoverImage').click(function () {
-    var rand = parseInt(Math.random() * 40 + 1);
-    $("#blogCoverImage").attr("src", '/admin/dist/img/rand/' + rand + ".jpg");
-    $("#blogCoverImage").attr("style", "width:160px ;height: 120px;display:block;");
+$('#uploadBlogCoverImage').click(function () {
+    console.log("uploadBlogCoverImage");
+    $('#articleModal').modal('show');
 });
+
+$('#previewBlogCoverImage').click(function () {
+    console.log("previewBlogCoverImage");
+    if($('#blogCoverImage').val() === null || $('#blogCoverImage').val() === ''){
+        swal("请上传或选择封面", {
+            icon: "error",
+        });
+        return;
+    }
+    $('#picPreview').html();
+    $('#picPreview').html("<img src='" + $('#blogCoverImage').val() + "' height=\"450\" width=\"800\"/>");
+    $('#picPreviewModal').modal('show');
+});
+
+
+

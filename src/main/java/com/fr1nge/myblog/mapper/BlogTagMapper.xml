@@ -15,4 +15,33 @@
         tag_id, tag_name, is_deleted, create_time
     </sql>
 
+    <resultMap id="BaseCountResultMap" type="com.fr1nge.myblog.entity.BlogTagCount">
+        <id column="tag_id" jdbcType="INTEGER" property="tagId"/>
+        <result column="tag_count" jdbcType="INTEGER" property="tagCount"/>
+        <result column="tag_name" jdbcType="VARCHAR" property="tagName"/>
+    </resultMap>
+
+    <select id="getTagCount" resultMap="BaseCountResultMap">
+        select
+            tag_id ,
+            tag_name,
+            COUNT(tag_id) as tag_count
+        from
+            (
+                select
+                    tr.tag_id,bt.tag_name
+                from
+                    blog_tag_relation tr
+                        left join blog b on
+                        tr.blog_id = b.blog_id
+                        left join blog_tag bt on
+                        tr.tag_id = bt.tag_id
+                where
+                    b.is_deleted = 0 and blog_status = 1) trb
+        group by
+            tag_id
+        order by
+            tag_count
+    </select>
+
 </mapper>

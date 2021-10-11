@@ -68,10 +68,10 @@ public class AdminController {
                         @RequestParam("verifyCode") String verifyCode,
                         HttpSession session) {
         String kaptchaCode = (String) session.getAttribute("verifyCode");
-//        if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
-//            session.setAttribute("errorMsg", "验证码错误");
-//            return "admin/login";
-//        }
+        if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
+            session.setAttribute("errorMsg", "验证码错误");
+            return "admin/login";
+        }
         QueryWrapper<AdminUser> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(AdminUser::getLoginUserName, userName).eq(AdminUser::getLoginPassword, GetMD5.encryptString(password));
         AdminUser adminUser = adminUserService.getOne(wrapper);

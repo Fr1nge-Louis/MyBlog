@@ -18,22 +18,22 @@ insert  into `admin_user`(`admin_user_id`,`login_user_name`,`login_password`,`ni
 DROP TABLE IF EXISTS `blog`;
 
 CREATE TABLE `blog` (
-                        `blog_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '博客表主键id',
-                        `blog_title` varchar(200) NOT NULL COMMENT '博客标题',
-                        `blog_sub_url` varchar(200) NOT NULL COMMENT '博客自定义路径url',
-                        `blog_cover_image` varchar(200) NOT NULL COMMENT '博客封面图',
-                        `blog_content` mediumtext NOT NULL COMMENT '博客内容',
-                        `blog_category_id` int(11) NOT NULL COMMENT '博客分类id',
-                        `blog_category_name` varchar(50) NOT NULL COMMENT '博客分类(冗余字段)',
-                        `blog_tags` varchar(200) NOT NULL COMMENT '博客标签',
-                        `blog_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-草稿 1-发布',
-                        `blog_views` bigint(20) NOT NULL DEFAULT '0' COMMENT '阅读量',
-                        `enable_comment` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0-允许评论 1-不允许评论',
-                        `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
+                        `blog_id` bigint NOT NULL AUTO_INCREMENT COMMENT '博客表主键id',
+                        `blog_title` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '博客标题',
+                        `blog_sub_url` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '博客自定义路径url',
+                        `blog_cover_image` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '博客封面图',
+                        `blog_content` mediumtext CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '博客内容',
+                        `blog_category_id` int DEFAULT NULL COMMENT '博客分类id',
+                        `blog_category_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '博客分类(冗余字段)',
+                        `blog_tags` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '博客标签',
+                        `blog_status` tinyint NOT NULL DEFAULT '0' COMMENT '0-草稿 1-发布',
+                        `blog_views` bigint NOT NULL DEFAULT '0' COMMENT '阅读量',
+                        `enable_comment` tinyint NOT NULL DEFAULT '1' COMMENT '0-不允许评论 1-允许评论',
+                        `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '是否删除 0=否 1=是',
                         `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
                         `update_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
                         PRIMARY KEY (`blog_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3
 
 
 
@@ -212,13 +212,13 @@ CREATE TABLE `blog_file` (
                              `file_id` int NOT NULL AUTO_INCREMENT COMMENT '主键',
                              `file_name` varchar(200) DEFAULT NULL COMMENT '文件显示名称',
                              `file_real_name` varchar(200) DEFAULT NULL COMMENT '文件真实名称',
-                             `file_url` varchar(200) DEFAULT NULL COMMENT '文件储存路径',
+                             `file_url` varchar(200) DEFAULT NULL COMMENT '文件路径',
                              `file_req_url` varchar(300) DEFAULT NULL COMMENT '文件请求路径',
                              `file_size` bigint DEFAULT NULL COMMENT '文件大小',
-                             `file_md5` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件MD5',
+                             `file_md5` varchar(200) DEFAULT NULL COMMENT '文件MD5',
+                             `file_type` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型：1-图片，2-其他',
                              `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-
                              PRIMARY KEY (`file_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 

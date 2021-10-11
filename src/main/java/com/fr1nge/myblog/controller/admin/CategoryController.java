@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fr1nge.myblog.entity.Blog;
 import com.fr1nge.myblog.entity.BlogCategory;
-import com.fr1nge.myblog.entity.BlogLink;
 import com.fr1nge.myblog.service.BlogCategoryService;
 import com.fr1nge.myblog.service.BlogService;
 import com.fr1nge.myblog.util.PageResult;
@@ -51,11 +50,11 @@ public class CategoryController {
         if (limit == null) {
             limit = 10;
         }
-        Page<BlogCategory> pageQuery = new Page<>((page - 1) * page, limit);
+        Page<BlogCategory> pageQuery = new Page<>(page, limit);
 
         IPage<BlogCategory> categoryIPage = categoryService.selectPage(pageQuery, lambdaQueryWrapper);
         PageResult pageResult = new PageResult(categoryIPage.getRecords(),
-                (int) categoryIPage.getTotal(), (int) categoryIPage.getSize(), (int) categoryIPage.getCurrent());
+                (int) categoryIPage.getTotal(), (int) categoryIPage.getSize(), page);
         return ResultGenerator.genSuccessResult(pageResult);
     }
 
@@ -73,8 +72,13 @@ public class CategoryController {
         }
         BlogCategory blogCategory = new BlogCategory();
         blogCategory.setCategoryName(categoryName).setCategoryIcon(categoryIcon);
-        categoryService.save(blogCategory);
-        return ResultGenerator.genSuccessResult();
+        boolean flag = categoryService.save(blogCategory);
+        if (flag) {
+            return ResultGenerator.genSuccessResult();
+        } else {
+            return ResultGenerator.genFailResult("添加失败");
+        }
+
 
     }
 
@@ -105,9 +109,9 @@ public class CategoryController {
     public Result delete(@RequestBody Integer[] ids) {
         LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
         blogLambdaQueryWrapper.in(Blog::getBlogCategoryId, Arrays.asList(ids))
-                .eq(Blog::getIsDeleted,0);
-        List<Blog> blogList = blogService.list();
-        if(!blogList.isEmpty()){
+                .eq(Blog::getIsDeleted, 0);
+        List<Blog> blogList = blogService.list(blogLambdaQueryWrapper);
+        if (blogList.size() > 0) {
             return ResultGenerator.genFailResult("删除失败,该分类下有未删除的博客");
         }
         LambdaQueryWrapper<BlogCategory> categoryLambdaQueryWrapper = new LambdaQueryWrapper<>();

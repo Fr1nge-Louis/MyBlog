@@ -43,15 +43,22 @@ $(function () {
     });
 
     function coverImageFormatter(cellvalue) {
-        return "<img src='" + cellvalue + "' height=\"120\" width=\"160\" alt='coverImage'/>";
+        console.log(cellvalue);
+        var str;
+        if(cellvalue === null || cellvalue.trim() === '' || cellvalue.trim() === 'null'){
+            str = "未上传封面！";
+        }else {
+            str = "<img src='" + cellvalue + "' height=\"120\" width=\"160\" alt='coverImage'/>";
+        }
+        return str;
     }
 
     function statusFormatter(cellvalue) {
         if (cellvalue == 0) {
-            return "<button type=\"button\" class=\"btn btn-block btn-secondary btn-sm\" style=\"width: 50%;\">草稿</button>";
+            return "<span class=\"badge badge-secondary\">草稿</span>";
         }
         else if (cellvalue == 1) {
-            return "<button type=\"button\" class=\"btn btn-block btn-success btn-sm\" style=\"width: 50%;\">发布</button>";
+            return "<span class=\"badge badge-success\">发布</span>";
         }
     }
 

@@ -79,7 +79,7 @@ public class Blog extends Model<Blog> {
     private Long blogViews;
 
     /**
-     * 0-允许评论 1-不允许评论
+     * 0-不允许评论 1-允许评论
      */
     private Integer enableComment;
 

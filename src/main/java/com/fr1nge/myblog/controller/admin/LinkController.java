@@ -46,10 +46,10 @@ public class LinkController {
         LambdaQueryWrapper<BlogLink> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BlogLink::getIsDeleted,0)
                 .orderByAsc(BlogLink::getLinkRank);
-        Page<BlogLink> pageQuery = new Page<>((page - 1) * page, limit);
+        Page<BlogLink> pageQuery = new Page<>(page, limit);
         IPage<BlogLink> linkIPage = linkService.selectPage(pageQuery, queryWrapper);
         PageResult pageResult = new PageResult(linkIPage.getRecords(),
-                (int) linkIPage.getTotal(), (int) linkIPage.getSize(), (int) linkIPage.getCurrent());
+                (int) linkIPage.getTotal(), (int) linkIPage.getSize(), page);
         return ResultGenerator.genSuccessResult(pageResult);
     }
 
