@@ -68,13 +68,13 @@
             url: '/admin/file/list',
             datatype: "json",
             colModel: [
-                {label: 'id', name: 'fileId', index: 'fileId', width: 50, key: true, hidden: true},
+                {label: 'id', name: 'fileId', index: 'fileId', key: true, hidden: true},
+                {label: '文件类型', name: 'fileType', index: 'fileType', hidden: true},
                 {label: '文件名称', name: 'fileName', index: 'fileName', width: 140,editable:true},
                 {label: '文件路径', name: 'fileUrl', index: 'fileUrl', width: 120},
-                {label: '文件预览', name: 'fileReqUrl', index: 'fileReqUrl', width: 120, formatter: imageFormatter},
-                {label: '文件大小', name: 'fileSize', index: 'fileSize', width: 100, formatter: fileSizeFormatter},
-                {label: '文件类型', name: 'fileType', index: 'fileType', width: 50, hidden: true},
-                {label: '添加时间', name: 'createTime', index: 'createTime', width: 100}
+                {label: '文件预览', name: 'fileReqUrl', index: 'fileReqUrl', width: 160, formatter: imageFormatter},
+                {label: '文件大小', name: 'fileSize', index: 'fileSize', width: 40, formatter: fileSizeFormatter},
+                {label: '添加时间', name: 'createTime', index: 'createTime', width: 90}
             ],
             height: 700,
             rowNum: 10,

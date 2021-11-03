@@ -11,6 +11,8 @@ import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
 import com.fr1nge.myblog.util.ResultGenerator;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -86,18 +88,37 @@ public class CategoryController {
     /**
      * 分类修改
      */
+    @Transactional
     @RequestMapping(value = "/categories/update", method = RequestMethod.POST)
     @ResponseBody
     public Result update(@RequestParam("categoryId") Integer categoryId,
                          @RequestParam("categoryName") String categoryName,
                          @RequestParam("categoryIcon") String categoryIcon) {
-        BlogCategory blogCategory = categoryService.getById(categoryId);
-        blogCategory.setCategoryName(categoryName).setCategoryIcon(categoryIcon);
-        if (categoryService.updateById(blogCategory)) {
+        try {
+            BlogCategory blogCategory = categoryService.getById(categoryId);
+            blogCategory.setCategoryName(categoryName).setCategoryIcon(categoryIcon);
+            if (!categoryService.updateById(blogCategory)) {
+                throw new RuntimeException();
+            }
+
+            //修改blog的冗余字段
+            LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            blogLambdaQueryWrapper.eq(Blog::getBlogCategoryId, categoryId);
+            List<Blog> blogList = blogService.list(blogLambdaQueryWrapper);
+            for (Blog blog : blogList) {
+                blog.setBlogCategoryName(categoryName);
+            }
+            if (!blogService.updateBatchById(blogList)) {
+                throw new RuntimeException();
+            }
             return ResultGenerator.genSuccessResult();
-        } else {
-            return ResultGenerator.genFailResult("分类名称重复");
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            return ResultGenerator.genFailResult("修改失败");
         }
+
+
     }
 
 

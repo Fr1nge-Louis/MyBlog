@@ -39,7 +39,8 @@ public class ConfigurationController {
     public Result website(@RequestParam(value = "websiteName", required = false) String websiteName,
                           @RequestParam(value = "websiteDescription", required = false) String websiteDescription,
                           @RequestParam(value = "websiteLogo", required = false) String websiteLogo,
-                          @RequestParam(value = "websiteIcon", required = false) String websiteIcon) {
+                          @RequestParam(value = "websiteIcon", required = false) String websiteIcon,
+                          @RequestParam(value = "backgroudImg", required = false) String backgroudImg) {
         List<BlogConfig> blogConfigList = new ArrayList<>();
         if (StringUtils.isNotBlank(websiteName)) {
             BlogConfig blogConfig = getByName("websiteName", websiteName);
@@ -61,6 +62,12 @@ public class ConfigurationController {
         }
         if (StringUtils.isNotBlank(websiteIcon)) {
             BlogConfig blogConfig = getByName("websiteIcon", websiteIcon);
+            if (blogConfig != null) {
+                blogConfigList.add(blogConfig);
+            }
+        }
+        if (StringUtils.isNotBlank(backgroudImg)) {
+            BlogConfig blogConfig = getByName("backgroudImg", backgroudImg);
             if (blogConfig != null) {
                 blogConfigList.add(blogConfig);
             }

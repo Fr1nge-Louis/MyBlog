@@ -267,38 +267,48 @@ public class BlogController {
         //如果是修改blog，则需要删除或者插入tagRelation
         if (oldBlog != null) {
             if(!StringUtils.equals(newBlog.getBlogTags(),oldBlog.getBlogTags())) {
-                List<String> oldTagList = Arrays.asList(oldBlog.getBlogTags().split(","));
-                List<String> newTagList = Arrays.asList(tags);
-                List<String> saveTagList = new ArrayList<>();
-                List<String> delTagList = new ArrayList<>();
+                List<String> oldTagNameList = Arrays.asList(oldBlog.getBlogTags().split(","));
+                List<String> newTagNameList = Arrays.asList(tags);
+                List<String> saveTagNameList = new ArrayList<>();
+                List<String> delTagNameList = new ArrayList<>();
                 //newTagList中有，oldTagList没有，则是需要新增的
-                for (String tagName : newTagList) {
-                    if (!oldTagList.contains(tagName)) {
-                        saveTagList.add(tagName);
+                for (String tagName : newTagNameList) {
+                    if (!oldTagNameList.contains(tagName)) {
+                        saveTagNameList.add(tagName);
                     }
                 }
                 //oldTagList中有，newTagList没有，则是需要删除的
-                for (String tagName : oldTagList) {
-                    if (!newTagList.contains(tagName)) {
-                        delTagList.add(tagName);
+                for (String tagName : oldTagNameList) {
+                    if (!newTagNameList.contains(tagName)) {
+                        delTagNameList.add(tagName);
                     }
                 }
 
                 //新增
-                if (saveTagList.size() > 0) {
+                if (saveTagNameList.size() > 0) {
+                    //查询已经存在的blogtag
                     tagLambdaQueryWrapper = new LambdaQueryWrapper<>();
-                    tagLambdaQueryWrapper.in(BlogTag::getTagName, saveTagList);
+                    tagLambdaQueryWrapper.in(BlogTag::getTagName, saveTagNameList);
                     List<BlogTag> tagList = tagService.list(tagLambdaQueryWrapper);
+
+                    //刚刚新增的blogtag中获取blogtagid
+                    for (BlogTag blogTag:saveTags){
+                        if(saveTagNameList.contains(blogTag.getTagName())){
+                            tagList.add(blogTag);
+                        }
+                    }
+
                     for (BlogTag blogTag : tagList) {
                         BlogTagRelation blogTagRelation = new BlogTagRelation();
                         blogTagRelation.setBlogId(newBlog.getBlogId()).setTagId(blogTag.getTagId());
                         blogTagRelations.add(blogTagRelation);
                     }
                 }
+
                 //删除
-                if (delTagList.size() > 0) {
+                if (delTagNameList.size() > 0) {
                     tagLambdaQueryWrapper = new LambdaQueryWrapper<>();
-                    tagLambdaQueryWrapper.in(BlogTag::getTagName, delTagList);
+                    tagLambdaQueryWrapper.in(BlogTag::getTagName, delTagNameList);
                     List<BlogTag> tagList = tagService.list(tagLambdaQueryWrapper);
                     List<Integer> ids = tagList.stream().map(e -> e.getTagId()).collect(Collectors.toList());
 
@@ -311,12 +321,14 @@ public class BlogController {
         }
         //如果是新增blog
         else {
+            saveTags.addAll(blogTagList);
             for (BlogTag blogTag : saveTags) {
                 BlogTagRelation blogTagRelation = new BlogTagRelation();
                 blogTagRelation.setBlogId(newBlog.getBlogId()).setTagId(blogTag.getTagId());
                 blogTagRelations.add(blogTagRelation);
             }
         }
+
         //TagRelation插入
         if (blogTagRelations.size() > 0) {
             if (!tagRelationService.saveBatch(blogTagRelations)) {
@@ -326,6 +338,5 @@ public class BlogController {
 
         return true;
     }
-
 
 }

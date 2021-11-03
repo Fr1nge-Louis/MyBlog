@@ -49,4 +49,9 @@ public class GetMD5 {
         }
         return md5str.toString().toUpperCase();
     }
+
+    public static void main(String[] args) {
+        String a = GetMD5.encryptString("liuhs?2021");
+        System.out.println(a);
+    }
 }

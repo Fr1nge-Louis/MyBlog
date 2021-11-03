@@ -67,18 +67,18 @@ insert  into `blog_category`(`category_id`,`category_name`,`category_icon`,`cate
 DROP TABLE IF EXISTS `blog_comment`;
 
 CREATE TABLE `blog_comment` (
-                                `comment_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
-                                `blog_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '关联的blog主键',
-                                `commentator` varchar(50) NOT NULL DEFAULT '' COMMENT '评论者名称',
-                                `email` varchar(100) NOT NULL DEFAULT '' COMMENT '评论人的邮箱',
-                                `website_url` varchar(50) NOT NULL DEFAULT '' COMMENT '网址',
-                                `comment_body` varchar(200) NOT NULL DEFAULT '' COMMENT '评论内容',
+                                `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
+                                `blog_id` bigint NOT NULL DEFAULT '0' COMMENT '关联的blog主键',
+                                `commentator` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '评论者名称',
+                                `email` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '评论人的邮箱',
+                                `website_url` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '网址',
+                                `comment_body` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '评论内容',
                                 `comment_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '评论提交时间',
-                                `commentator_ip` varchar(20) NOT NULL DEFAULT '' COMMENT '评论时的ip地址',
-                                `reply_body` varchar(200) NOT NULL DEFAULT '' COMMENT '回复内容',
-                                `reply_create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '回复时间',
-                                `comment_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否审核通过 0-未审核 1-审核通过',
-                                `is_deleted` tinyint(4) DEFAULT '0' COMMENT '是否删除 0-未删除 1-已删除',
+                                `commentator_ip` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '评论时的ip地址',
+                                `reply_body` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '回复内容',
+                                `reply_create_time` datetime DEFAULT NULL COMMENT '回复时间',
+                                `comment_status` tinyint NOT NULL DEFAULT '0' COMMENT '是否审核通过 0-未审核 1-审核通过',
+                                `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '是否删除 0-未删除 1-已删除',
                                 PRIMARY KEY (`comment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -167,7 +167,9 @@ insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_ti
 insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourAvatar','/admin/dist/img/13.png','2018-11-11 20:33:14','2019-05-07 21:56:23');
 insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourEmail','2449207463@qq.com','2018-11-11 20:33:17','2019-05-07 21:56:23');
 insert  into `blog_config`(`config_name`,`config_value`,`create_time`,`update_time`) values ('yourName','13','2018-11-11 20:33:20','2019-05-07 21:56:23');
-
+INSERT INTO my_blog.blog_config (config_name,config_value,create_time,update_time) VALUES
+    ('backgroudImg','/blog/yummy-jekyll/assets/images/read.jpg','2021-10-12 17:39:52.0','2021-10-12 17:39:52.0')
+;
 
 
 DROP TABLE IF EXISTS `blog_link`;

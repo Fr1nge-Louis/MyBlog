@@ -10,12 +10,15 @@ import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
 import com.fr1nge.myblog.util.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -73,7 +76,7 @@ public class CommentController {
     public Result checkDone(@RequestParam("commentId") Long commentId,
                             @RequestParam("replyBody") String replyBody) {
         BlogComment blogComment = commentService.getById(commentId);
-        blogComment.setReplyBody(replyBody);
+        blogComment.setReplyBody(replyBody).setReplyCreateTime(new Date());
         if (commentService.updateById(blogComment)) {
             return ResultGenerator.genSuccessResult();
         } else {
@@ -95,6 +98,23 @@ public class CommentController {
         } else {
             return ResultGenerator.genFailResult("刪除失败");
         }
+    }
+
+    @PostMapping("/comments/edit")
+    @ResponseBody
+    public Result edit(@RequestParam("commentId") Long commentId,
+                       @RequestParam("commentBody") String commentBody,
+                       HttpServletResponse response) {
+         BlogComment comment = commentService.getById(commentId);
+         if(StringUtils.equals(commentBody,comment.getCommentBody())){
+             return ResultGenerator.genSuccessResult();
+         }
+         comment.setCommentBody(commentBody);
+         if(!commentService.updateById(comment)){
+             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+             return ResultGenerator.genFailResult("修改失败");
+         }
+         return ResultGenerator.genSuccessResult();
     }
 
     @GetMapping("/comments")

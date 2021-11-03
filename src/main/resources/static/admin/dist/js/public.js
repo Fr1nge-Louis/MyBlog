@@ -167,3 +167,10 @@ function getSelectedRows() {
     }
     return grid.getGridParam("selarrrow");
 }
+
+
+function getSelectedRowData(rowId) {
+    var grid = $("#jqGrid");
+    var rowData = grid.jqGrid('getRowData',rowId)
+    return rowData;
+}

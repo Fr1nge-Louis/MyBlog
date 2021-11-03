@@ -1,5 +1,6 @@
 package com.fr1nge.myblog.controller.admin;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fr1nge.myblog.entity.AdminUser;
 import com.fr1nge.myblog.entity.BlogConfig;
@@ -58,7 +59,10 @@ public class AdminController {
     }
 
     @GetMapping({"/login"})
-    public String login() {
+    public String login(HttpServletRequest request) {
+        Map<String,String> config = getConfig();
+        request.setAttribute("websiteName", config.get("websiteName"));
+        request.setAttribute("websiteIcon", config.get("websiteIcon"));
         return "admin/login";
     }
 
@@ -76,6 +80,8 @@ public class AdminController {
         wrapper.lambda().eq(AdminUser::getLoginUserName, userName).eq(AdminUser::getLoginPassword, GetMD5.encryptString(password));
         AdminUser adminUser = adminUserService.getOne(wrapper);
         if (adminUser != null) {
+            //设置session失效时间两个小时
+            session.setMaxInactiveInterval(60*60*2);
             //登陆成功，将信息储存到session
             //储存用户信息
             session.setAttribute("loginUser", adminUser.getNickName());
@@ -84,10 +90,7 @@ public class AdminController {
             String token = JwtUtil.generateToken(signingKey, adminUser.getNickName());
             session.setAttribute(tokenName, token);
             //储存配置信息
-            List<BlogConfig> blogConfigList = configService.list();
-            Map<String, String> configMap = blogConfigList.stream()
-                    .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));
-            session.setAttribute("config", configMap);
+            session.setAttribute("config", getConfig());
             return "redirect:/admin/index";
         } else {
             session.setAttribute("errorMsg", "登陆失败");
@@ -98,6 +101,9 @@ public class AdminController {
     @GetMapping("/user/logout")
     public String logout(HttpServletRequest request) {
         request.getSession().invalidate();
+        Map<String,String> config = getConfig();
+        request.setAttribute("websiteName", config.get("websiteName"));
+        request.setAttribute("websiteIcon", config.get("websiteIcon"));
         return "admin/login";
     }
 
@@ -156,4 +162,10 @@ public class AdminController {
         }
     }
 
+    private Map<String,String> getConfig(){
+        List<BlogConfig> blogConfigList = configService.list();
+        Map<String, String> configMap = blogConfigList.stream()
+                .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));
+        return configMap;
+    }
 }

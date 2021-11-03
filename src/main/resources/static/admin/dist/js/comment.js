@@ -4,12 +4,13 @@ $(function () {
         datatype: "json",
         colModel: [
             {label: 'id', name: 'commentId', index: 'commentId', width: 50, key: true, hidden: true},
-            {label: '评论内容', name: 'commentBody', index: 'commentBody', width: 120},
+            {label: '评论内容', name: 'commentBody', index: 'commentBody', width: 120, editable:true},
             {label: '评论时间', name: 'commentCreateTime', index: 'commentCreateTime', width: 60},
             {label: '评论人名称', name: 'commentator', index: 'commentator', width: 60},
             {label: '评论人邮箱', name: 'email', index: 'email', width: 90},
-            {label: '状态', name: 'commentStatus', index: 'commentStatus', width: 60, formatter: statusFormatter},
+            {label: '状态', name: 'commentStatus', index: 'commentStatus', width: 50, formatter: statusFormatter},
             {label: '回复内容', name: 'replyBody', index: 'replyBody', width: 120},
+            {label: '原文链接', name: 'blogId', index: 'blogId', width: 20,formatter: linkFormatter}
         ],
         height: 700,
         rowNum: 10,
@@ -35,6 +36,35 @@ $(function () {
         gridComplete: function () {
             //隐藏grid底部滚动条
             $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+        },
+        ondblClickRow: function (id) {
+            var rowData = $('#jqGrid').jqGrid('getRowData',id);
+            $('#jqGrid').jqGrid('editRow',id,{
+                keys : true,        //这里按[enter]保存
+                url: "/admin/comments/edit",
+                mtype : "POST",
+                restoreAfterError: true,
+                extraparam: {
+                    "fileId": rowData.id
+                },
+                successfunc: function(response){
+                    console.log("成功");
+                    console.log(response);
+
+                    swal(response.responseJSON.message, {
+                        icon: "success",
+                    });
+                    return true;
+                },
+                errorfunc: function(rowid, response){
+                    console.log("失败");
+                    console.log(response);
+                    swal(response.responseJSON.message, {
+                        icon: "error",
+                    });
+                    return false;
+                }
+            });
         }
     });
     $(window).resize(function () {
@@ -47,6 +77,11 @@ $(function () {
         else if (cellvalue == 1) {
             return "<span class=\"badge badge-success\">已审核</span>";
         }
+    }
+    function linkFormatter(cellvalue){
+        var url = "/blog/"+cellvalue;
+        console.log(url);
+        return "<a target='_blank' href='" + url + "'>" + "查看" + "</a>";
     }
 
 });

@@ -328,17 +328,15 @@ public class MyBlogController {
 
     /**
      * 关于页面 以及其他配置了subUrl的文章页
-     *
-     * @return
      */
     @GetMapping({"/{subUrl}"})
     public String detail(HttpServletRequest request,
                          @PathVariable("subUrl") String subUrl,
                          @RequestParam(value = "commentPage", required = false, defaultValue = "1") Integer commentPage) {
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Blog::getIsDeleted,0)//未删除
-                .eq(Blog::getBlogStatus,1)//已发布
-                .eq(Blog::getBlogSubUrl,subUrl);
+        queryWrapper.eq(Blog::getBlogSubUrl,subUrl)
+                .eq(Blog::getIsDeleted,0)//未删除
+                .eq(Blog::getBlogStatus,1);//已发布
         Blog blog = blogService.getOne(queryWrapper);
         if (blog != null) {
             getBlogDetailAndComment(blog,request,commentPage);
@@ -349,6 +347,27 @@ public class MyBlogController {
             return "error/error_400";
         }
     }
+
+    /**
+     * 预览文章
+     */
+    @GetMapping({"/preview/{subUrl}","/my/{subUrl}"})
+    public String previewDetail(HttpServletRequest request,
+                         @PathVariable("subUrl") String subUrl,
+                         @RequestParam(value = "commentPage", required = false, defaultValue = "1") Integer commentPage) {
+        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Blog::getBlogSubUrl,subUrl).orderByAsc(Blog::getBlogViews);
+        Blog blog = blogService.getOne(queryWrapper);
+        if (blog != null) {
+            getBlogDetailForPreview(blog,request,commentPage);
+            request.setAttribute("pageName", subUrl);
+            request.setAttribute("configurations", getConfig());
+            return "blog/" + theme + "/detail";
+        } else {
+            return "error/error_400";
+        }
+    }
+
 
     //不同条件分页查询blog
     private PageResult getBlogByWrapper(LambdaQueryWrapper<Blog> wrapper,int pageNum,int pageSize){
@@ -414,6 +433,33 @@ public class MyBlogController {
 
         request.setAttribute("blogDetailVO", blogDetailVO);
 
+    }
+
+
+    private void getBlogDetailForPreview(Blog blog,HttpServletRequest request,int commentPage){
+        //BlogDetailVO
+        BlogDetailVO blogDetailVO = new BlogDetailVO();
+        //不显示评论
+        blogDetailVO.setCommentCount(0);
+
+        BeanUtils.copyProperties(blog, blogDetailVO);
+        //主体内容
+        blogDetailVO.setBlogContent(MarkDownUtil.markdownToHtmlExtensions(blogDetailVO.getBlogContent()));
+        //分类
+        BlogCategory blogCategory = categoryService.getById(blog.getBlogCategoryId());
+        if (blogCategory == null) {
+            blogCategory = new BlogCategory();
+            blogCategory.setCategoryId(0);
+            blogCategory.setCategoryName("默认分类");
+            blogCategory.setCategoryIcon("/admin/dist/img/category/00.png");
+        }
+        blogDetailVO.setBlogCategoryIcon(blogCategory.getCategoryIcon());
+        //标签
+        if (!StringUtils.isEmpty(blog.getBlogTags())) {
+            List<String> tags = Arrays.asList(blog.getBlogTags().split(","));
+            blogDetailVO.setBlogTags(tags);
+        }
+        request.setAttribute("blogDetailVO", blogDetailVO);
     }
 
 

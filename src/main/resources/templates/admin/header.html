@@ -3,11 +3,11 @@
 <head th:fragment="header-fragment">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>my personal blog | 后台管理系统</title>
+    <title th:text="|${session.config.websiteName} - 后台管理系统|">My Blog</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Font Awesome -->
-    <link rel="shortcut icon" th:href="@{/admin/dist/img/favicon.png}"/>
+    <link rel="shortcut icon" th:href="@{${session.config.websiteIcon}}"/>
     <link rel="stylesheet" th:href="@{/admin/plugins/fontawesome-5.15.4/css/all.css}">
     <!-- Ionicons -->
     <link rel="stylesheet" th:href="@{/admin/dist/css/ionicons.min.css}">

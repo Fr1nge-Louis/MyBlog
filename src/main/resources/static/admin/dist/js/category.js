@@ -124,8 +124,12 @@ function categoryEdit() {
         return;
     }
     $('.modal-title').html('分类编辑');
-    $('#categoryModal').modal('show');
+
     $("#categoryId").val(id);
+    var rowData = getSelectedRowData(id);
+    $("#categoryName").val(rowData.categoryName);
+    $('#categoryModal').modal('show');
+
 }
 
 function deleteCagegory() {
