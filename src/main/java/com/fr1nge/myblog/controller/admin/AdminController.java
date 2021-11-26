@@ -49,12 +49,32 @@ public class AdminController {
 
     @GetMapping({"/index"})
     public String index(HttpServletRequest request) {
+        LambdaQueryWrapper<BlogCategory> categoryQueryWrapper = new LambdaQueryWrapper<>();
+        categoryQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
+        int categoryCount = categoryService.count(categoryQueryWrapper);
+
+        LambdaQueryWrapper<Blog> blogQueryWrapper = new LambdaQueryWrapper<>();
+        blogQueryWrapper.eq(Blog::getIsDeleted, 0);
+        int blogCount = blogService.count(blogQueryWrapper);
+
+        LambdaQueryWrapper<BlogLink> linkQueryWrapper = new LambdaQueryWrapper<>();
+        linkQueryWrapper.eq(BlogLink::getIsDeleted, 0);
+        int linkCount = linkService.count(linkQueryWrapper);
+
+        LambdaQueryWrapper<BlogTag> tagQueryWrapper = new LambdaQueryWrapper<>();
+        tagQueryWrapper.eq(BlogTag::getIsDeleted, 0);
+        int tagCount = tagService.count(tagQueryWrapper);
+
+        LambdaQueryWrapper<BlogComment> commentQueryWrapper = new LambdaQueryWrapper<>();
+        commentQueryWrapper.eq(BlogComment::getIsDeleted, 0);
+        int commentCount = commentService.count(commentQueryWrapper);
+
         request.setAttribute("path", "index");
-        request.setAttribute("categoryCount", categoryService.count());
-        request.setAttribute("blogCount", blogService.count());
-        request.setAttribute("linkCount", linkService.count());
-        request.setAttribute("tagCount", tagService.count());
-        request.setAttribute("commentCount", commentService.count());
+        request.setAttribute("categoryCount", categoryCount);
+        request.setAttribute("blogCount", blogCount);
+        request.setAttribute("linkCount", linkCount);
+        request.setAttribute("tagCount", tagCount);
+        request.setAttribute("commentCount", commentCount);
         return "admin/index";
     }
 
