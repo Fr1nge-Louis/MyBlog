@@ -37,12 +37,12 @@ $(function () {
         //file.response 得到后台处理后的结果
         //file.filescount 得到文件个数
         //index 当前文件的下标
-        console.log(event);
-        console.log(previewId);
-        console.log(file.response);
+        // console.log(event);
+        // console.log(previewId);
+        // console.log(file.response);
         if (index === file.filescount-1 && file.response.resultCode === 200) {//当所有文件传输成功时
             //在这里执行文件全部上传成功的方法
-            console.log(file.response.data);
+            // console.log(file.response.data);
             $('#blogCoverImage').val(file.response.data);
         }
     });
@@ -107,14 +107,17 @@ $('#confirmButton').click(function () {
 
     var arr =new Array();
     arr = blogTags.split(',');
-    console.log(arr);
-    console.log(arr.length);
+    // console.log(arr);
+    // console.log(arr.length);
     if (arr.length>6) {
         swal("标签数量限制为6", {
             icon: "error",
         });
         return;
     }
+
+    $(this).attr("disabled", "disabled");
+
     var blogId = $('#blogId').val();
     var blogTitle = $('#blogName').val();
     var blogSubUrl = $('#blogSubUrl').val();
@@ -125,7 +128,7 @@ $('#confirmButton').click(function () {
     var blogStatus = $("#blogStatus option:selected").val();
     var enableComment = $("#enableComment option:selected").val();
 
-    console.log("提交，状态 和 评论"+blogStatus+","+enableComment);
+    // console.log("提交，状态 和 评论"+blogStatus+","+enableComment);
 
     var url = '/admin/blogs/save';
     var swlMessage = '保存成功';
@@ -149,7 +152,7 @@ $('#confirmButton').click(function () {
             "enableComment": enableComment
         };
     }
-    console.log(data);
+    // console.log(data);
     $.ajax({
         type: 'POST',//方法类型
         url: url,
@@ -190,12 +193,12 @@ $('#cancelButton').click(function () {
 });
 
 $('#uploadBlogCoverImage').click(function () {
-    console.log("uploadBlogCoverImage");
+    // console.log("uploadBlogCoverImage");
     $('#articleModal').modal('show');
 });
 
 $('#previewBlogCoverImage').click(function () {
-    console.log("previewBlogCoverImage");
+    // console.log("previewBlogCoverImage");
     if($('#blogCoverImage').val() === null || $('#blogCoverImage').val() === ''){
         swal("请上传或选择封面", {
             icon: "error",
