@@ -4,6 +4,17 @@
 <body class="hold-transition sidebar-mini">
 <link th:href="@{/admin/plugins/fontawesome-5.15.4/css/all.css}" rel="stylesheet"/>
 <link th:href="@{/admin/plugins/bootstrap/css/glyphicon.css}" rel="stylesheet"/>
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+    .SelectBG {
+        background-color: #E9D6EC;
+    }
+</style>
 <div class="wrapper">
     <!-- 引入页面头header-fragment -->
     <div th:replace="admin/header::header-nav"></div>
@@ -31,7 +42,7 @@
                                     class="fa fa-plus"></i>&nbsp;新增
                             </button>
                             <button class="btn btn-danger" onclick="deleteTag()"><i
-                                    class="fa fa-trash-o"></i>&nbsp;删除
+                                    class="fa fa-trash"></i>&nbsp;删除
                             </button>
                         </div>
                         <table id="jqGrid" class="table table-bordered">
@@ -61,6 +72,6 @@
 <!-- sweetalert -->
 <script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
 <script th:src="@{/admin/dist/js/public.js}"></script>
-<script th:src="@{/admin/dist/js/tag.js}"></script>
+<script th:src="@{/admin/dist/js/tag.js?version=1}"></script>
 </body>
 </html>

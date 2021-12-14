@@ -7,7 +7,7 @@
     <meta name="description" th:content="${configurations.get('websiteDescription')}">
     <!-- Favicon Icon -->
     <title th:text="|${configurations.get('websiteName')} - ${pageName}|">My Blog</title>
-    <link rel="shortcut icon" th:href="@{${configurations.get('websiteIcon')}}"/>
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{${configurations.get('websiteIcon')}}"/>
     <link rel="stylesheet" th:href="@{/blog/yummy-jekyll/plugins/jquery/dist/jquery.min.js}">
     <script type="application/javascript" th:src="@{/blog/yummy-jekyll/plugins/jquery/dist/jquery.min.js}"></script>
     <!-- Third-Party CSS -->

@@ -49,7 +49,8 @@ public class TagController {
             limit = 10;
         }
         LambdaQueryWrapper<BlogTag> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(BlogTag::getIsDeleted, 0)
+        queryWrapper
+                //.eq(BlogTag::getIsDeleted, 0)
                 .orderByAsc(BlogTag::getTagId);
         Page<BlogTag> pageQuery = new Page<>(page, limit);
         IPage<BlogTag> tagIPage = tagService.selectPage(pageQuery, queryWrapper);

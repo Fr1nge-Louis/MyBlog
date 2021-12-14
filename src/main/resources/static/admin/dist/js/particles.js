@@ -1275,7 +1275,7 @@ var pJS = function(tag_id, params){
               pJS.tmp.source_svg = data.currentTarget.response;
               pJS.fn.vendors.checkBeforeDraw();
             }else{
-              console.log('Error pJS - Image not found');
+              ('Error pJS - Image not found');
               pJS.tmp.img_error = true;
             }
           }
@@ -1312,7 +1312,7 @@ var pJS = function(tag_id, params){
           if(!pJS.particles.move.enable) cancelRequestAnimFrame(pJS.fn.drawAnimFrame);
           else pJS.fn.drawAnimFrame = requestAnimFrame(pJS.fn.vendors.draw);
         }else{
-          //console.log('still loading...');
+          console.log('still loading...');
           if(!pJS.tmp.img_error) pJS.fn.drawAnimFrame = requestAnimFrame(pJS.fn.vendors.draw);
         }
 
@@ -1345,7 +1345,7 @@ var pJS = function(tag_id, params){
       if(pJS.tmp.img_type == 'svg' && pJS.tmp.source_svg == undefined){
         pJS.tmp.checkAnimFrame = requestAnimFrame(check);
       }else{
-        //console.log('images loaded! cancel check');
+        console.log('images loaded! cancel check');
         cancelRequestAnimFrame(pJS.tmp.checkAnimFrame);
         if(!pJS.tmp.img_error){
           pJS.fn.vendors.init();

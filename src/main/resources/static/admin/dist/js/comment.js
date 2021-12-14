@@ -10,6 +10,7 @@ $(function () {
             {label: '评论人邮箱', name: 'email', index: 'email', width: 90},
             {label: '状态', name: 'commentStatus', index: 'commentStatus', width: 50, formatter: statusFormatter},
             {label: '回复内容', name: 'replyBody', index: 'replyBody', width: 120},
+            {label: '是否删除', name: 'isDeleted', index: 'isDeleted', width: 20,formatter: delFormatter},
             {label: '原文链接', name: 'blogId', index: 'blogId', width: 20,formatter: linkFormatter}
         ],
         height: 700,
@@ -33,6 +34,14 @@ $(function () {
             rows: "limit",
             order: "order",
         },
+        onSelectRow: function (rowid, status, rowData) {
+            if (status) {
+                $('#' + rowid).find("td").addClass("SelectBG");
+            } else {
+                $('#' + rowid).find("td").removeClass("SelectBG");
+
+            }
+        },
         gridComplete: function () {
             //隐藏grid底部滚动条
             $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
@@ -48,8 +57,8 @@ $(function () {
                     "fileId": rowData.id
                 },
                 successfunc: function(response){
-                    console.log("成功");
-                    console.log(response);
+                    //console.log("成功");
+                    //console.log(response);
 
                     swal(response.responseJSON.message, {
                         icon: "success",
@@ -57,8 +66,8 @@ $(function () {
                     return true;
                 },
                 errorfunc: function(rowid, response){
-                    console.log("失败");
-                    console.log(response);
+                    //console.log("失败");
+                    //console.log(response);
                     swal(response.responseJSON.message, {
                         icon: "error",
                     });
@@ -80,8 +89,17 @@ $(function () {
     }
     function linkFormatter(cellvalue){
         var url = "/blog/"+cellvalue;
-        console.log(url);
+        //console.log(url);
         return "<a target='_blank' href='" + url + "'>" + "查看" + "</a>";
+    }
+
+    function delFormatter(cellvalue) {
+        if (cellvalue == 0) {
+            return "<span class=\"badge badge-success\">存在</span>";
+        }
+        else if (cellvalue == 1) {
+            return "<span class=\"badge badge-danger\">已删除</span>";
+        }
     }
 
 });
@@ -181,7 +199,7 @@ function reply() {
         return;
     }
     var rowData = $("#jqGrid").jqGrid('getRowData', id);
-    console.log(rowData);
+    //console.log(rowData);
     if (rowData.commentStatus.indexOf('待审核') > -1) {
         swal("请先审核该评论再进行回复!", {
             icon: "warning",

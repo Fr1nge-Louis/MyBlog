@@ -5,6 +5,7 @@ $(function () {
         colModel: [
             {label: 'id', name: 'tagId', index: 'tagId', width: 50, key: true, hidden: true},
             {label: '标签名称', name: 'tagName', index: 'tagName', width: 240},
+            {label: '是否删除', name: 'isDeleted', index: 'isDeleted', width: 60, formatter: delFormatter},
             {label: '添加时间', name: 'createTime', index: 'createTime', width: 120}
         ],
         height: 560,
@@ -28,6 +29,14 @@ $(function () {
             rows: "limit",
             order: "order",
         },
+        onSelectRow: function (rowid, status, rowData) {
+            if (status) {
+                $('#' + rowid).find("td").addClass("SelectBG");
+            } else {
+                $('#' + rowid).find("td").removeClass("SelectBG");
+
+            }
+        },
         gridComplete: function () {
             //隐藏grid底部滚动条
             $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
@@ -36,6 +45,15 @@ $(function () {
     $(window).resize(function () {
         $("#jqGrid").setGridWidth($(".card-body").width());
     });
+
+    function delFormatter(cellvalue) {
+        if (cellvalue == 0) {
+            return "<span class=\"badge badge-success\">存在</span>";
+        }
+        else if (cellvalue == 1) {
+            return "<span class=\"badge badge-danger\">已删除</span>";
+        }
+    }
 });
 
 /**

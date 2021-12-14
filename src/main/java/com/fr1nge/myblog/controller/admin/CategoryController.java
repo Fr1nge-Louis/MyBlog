@@ -1,6 +1,7 @@
 package com.fr1nge.myblog.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fr1nge.myblog.entity.Blog;
@@ -45,7 +46,7 @@ public class CategoryController {
                        @RequestParam(required = false) Integer limit) {
 
         LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
+        //lambdaQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
         if (page == null) {
             page = 1;
         }
@@ -100,25 +101,17 @@ public class CategoryController {
             if (!categoryService.updateById(blogCategory)) {
                 throw new RuntimeException();
             }
-
             //修改blog的冗余字段
-            LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            blogLambdaQueryWrapper.eq(Blog::getBlogCategoryId, categoryId);
-            List<Blog> blogList = blogService.list(blogLambdaQueryWrapper);
-            for (Blog blog : blogList) {
-                blog.setBlogCategoryName(categoryName);
-            }
-            if (!blogService.updateBatchById(blogList)) {
-                throw new RuntimeException();
-            }
+            LambdaUpdateWrapper<Blog> blogLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            blogLambdaUpdateWrapper.eq(Blog::getBlogCategoryId,categoryId)
+                    .set(Blog::getBlogCategoryName,categoryName);
+            blogService.update(blogLambdaUpdateWrapper);
             return ResultGenerator.genSuccessResult();
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ResultGenerator.genFailResult("修改失败");
         }
-
-
     }
 
 

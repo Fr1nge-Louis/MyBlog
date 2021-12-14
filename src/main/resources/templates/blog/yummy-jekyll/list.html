@@ -19,6 +19,9 @@
     <article class="post container">
         <div class="row">
             <div class="col-md-10">
+                <th:block th:if="${null == blogPageResult}">
+                    <span>未搜索到相关文章</span>
+                </th:block>
                 <!-- Blog list -->
                 <ul id="posts-list">
                     <th:block th:if="${null != blogPageResult}">
@@ -27,7 +30,7 @@
                                 <div class="posts-content">
                                     <span class="posts-list-meta"
                                           th:text="${#dates.format(blog.createTime, 'yyyy-MM-dd')}">2019-01-01</span>
-                                    <a class="posts-list-name bubble-float-left" th:href="@{'/blog/' + ${blog.blogId}}">
+                                    <a class="posts-list-name bubble-float-left" th:href="@{'/blog/' + ${blog.blogId}}" target="_blank">
                                         <th:block th:text="${blog.blogTitle}"></th:block>
                                     </a>
                                     <span class="circle"></span>

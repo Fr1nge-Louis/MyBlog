@@ -40,7 +40,7 @@ $(function () {
                 url: "/admin/profile/password",
                 data: params,
                 success: function (r) {
-                    console.log(r);
+                    //console.log(r);
                     if (r == 'success') {
                         swal("保存成功", {
                             icon: "success",

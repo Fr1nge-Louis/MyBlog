@@ -4,14 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fr1nge.myblog.entity.Blog;
-import com.fr1nge.myblog.entity.BlogCategory;
-import com.fr1nge.myblog.entity.BlogTag;
-import com.fr1nge.myblog.entity.BlogTagRelation;
-import com.fr1nge.myblog.service.BlogCategoryService;
-import com.fr1nge.myblog.service.BlogService;
-import com.fr1nge.myblog.service.BlogTagRelationService;
-import com.fr1nge.myblog.service.BlogTagService;
+import com.fr1nge.myblog.entity.*;
+import com.fr1nge.myblog.service.*;
 import com.fr1nge.myblog.util.PageResult;
 import com.fr1nge.myblog.util.Result;
 import com.fr1nge.myblog.util.ResultGenerator;
@@ -34,12 +28,18 @@ public class BlogController {
 
     @Resource
     private BlogService blogService;
+
     @Resource
     private BlogCategoryService categoryService;
+
     @Resource
     private BlogTagService tagService;
+
     @Resource
     private BlogTagRelationService tagRelationService;
+
+    @Resource
+    private BlogCommentService commentService;
 
     @GetMapping("/blogs/list")
     @ResponseBody
@@ -50,7 +50,21 @@ public class BlogController {
                        @RequestParam(required = false) Integer limit) {
 
         LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Blog::getIsDeleted, 0);
+        queryWrapper.select(
+                Blog::getBlogId,
+                Blog::getBlogTitle,
+                Blog::getBlogSubUrl,
+                Blog::getBlogCoverImage,
+                Blog::getBlogCategoryId,
+                Blog::getBlogCategoryName,
+                Blog::getBlogTags,
+                Blog::getBlogStatus,
+                Blog::getBlogViews,
+                Blog::getEnableComment,
+                Blog::getIsDeleted,
+                Blog::getCreateTime,
+                Blog::getUpdateTime);
+        //queryWrapper.eq(Blog::getIsDeleted, 0);
         if (StringUtils.isNotBlank(keyword)) {
             queryWrapper.like(Blog::getBlogTitle, keyword).or()
                     .like(Blog::getBlogCategoryName, keyword);
@@ -61,6 +75,7 @@ public class BlogController {
         if (StringUtils.isNotBlank(blogCategoryId)) {
             queryWrapper.eq(Blog::getBlogCategoryId, blogCategoryId);
         }
+        queryWrapper.orderByDesc(Blog::getCreateTime);
         if (page == null) {
             page = 1;
         }
@@ -76,9 +91,21 @@ public class BlogController {
     }
 
 
-    @GetMapping("/blogs")
-    public String list(HttpServletRequest request) {
+    @RequestMapping("/blogs")
+    public String list(HttpServletRequest request,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer pageSize,
+                       @RequestParam(required = false) Integer pageNum) {
+        if(pageSize == null){
+            pageSize = 10;
+        }
+        if (pageNum == null){
+            pageNum = 1;
+        }
         request.setAttribute("path", "blogs");
+        request.setAttribute("pageSize", pageSize);
+        request.setAttribute("pageNum", pageNum);
+        request.setAttribute("keyword", keyword);
         return "admin/blog";
     }
 
@@ -92,9 +119,12 @@ public class BlogController {
         return "admin/edit";
     }
 
-    @GetMapping("/blogs/edit/{blogId}")
-    public String edit(HttpServletRequest request, @PathVariable("blogId") Long blogId) {
-        request.setAttribute("path", "edit");
+    @RequestMapping("/blogs/edit/{blogId}")
+    public String edit(HttpServletRequest request, @PathVariable("blogId") Long blogId,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) Integer pageSize,
+                       @RequestParam(required = false) Integer pageNum) {
+
         Blog blog = blogService.getById(blogId);
         if (blog == null) {
             return "error/error_400";
@@ -102,8 +132,19 @@ public class BlogController {
         LambdaQueryWrapper<BlogCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(BlogCategory::getIsDeleted, 0);
         List<BlogCategory> blogCategoryList = categoryService.list(lambdaQueryWrapper);
+
+        if(pageSize == null){
+            pageSize = 10;
+        }
+        if (pageNum == null){
+            pageNum = 1;
+        }
+        request.setAttribute("path", "edit");
         request.setAttribute("blog", blog);
         request.setAttribute("categories", blogCategoryList);
+        request.setAttribute("pageSize", pageSize);
+        request.setAttribute("pageNum", pageNum);
+        request.setAttribute("keyword", keyword);
         return "admin/edit";
     }
 
@@ -133,7 +174,7 @@ public class BlogController {
                     .setBlogCoverImage(blogCoverImage.trim())
                     .setBlogStatus(blogStatus)
                     .setEnableComment(enableComment);
-            if (!saveOrUpdateBlog(blog,null, tags)) {
+            if (!saveOrUpdateBlog(blog, null, tags)) {
                 throw new RuntimeException();
             }
             return ResultGenerator.genSuccessResult();
@@ -179,7 +220,6 @@ public class BlogController {
             newBlog.setBlogId(blogId)
                     .setBlogTitle(blogTitle.trim())
                     .setBlogSubUrl(blogSubUrl.trim())
-                    .setBlogCategoryId(blogCategoryId)
                     .setBlogCoverImage(blogCoverImage.trim())
                     .setBlogContent(blogContent)
                     .setBlogCategoryId(blogCategoryId)
@@ -191,7 +231,7 @@ public class BlogController {
                     .setIsDeleted(oldBlog.getIsDeleted())
                     .setCreateTime(oldBlog.getCreateTime())
                     .setUpdateTime(new Date());
-            if (!saveOrUpdateBlog(newBlog,oldBlog, tags)) {
+            if (!saveOrUpdateBlog(newBlog, oldBlog, tags)) {
                 throw new RuntimeException();
             }
             return ResultGenerator.genSuccessResult();
@@ -209,18 +249,31 @@ public class BlogController {
     @ResponseBody
     public Result delete(@RequestBody Integer[] ids) {
         try {
-            LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.in(Blog::getBlogId, Arrays.asList(ids));
-            List<Blog> blogList = blogService.list(queryWrapper);
-            for (int i = 0; i < blogList.size(); i++) {
-                blogList.get(i).setIsDeleted(1);
+            LambdaQueryWrapper<Blog> blogQueryWrapper = new LambdaQueryWrapper<>();
+            blogQueryWrapper.in(Blog::getBlogId, Arrays.asList(ids))
+                    .eq(Blog::getIsDeleted,0);
+            if(blogService.count() == 0){
+                return ResultGenerator.genSuccessResult();
             }
-            if (!blogService.updateBatchById(blogList)) {
-
-            }
-            if (!tagRelationService.removeByIds(Arrays.asList(ids))) {
+            //删除文章--更新删除标志位
+            LambdaUpdateWrapper<Blog> blogUpdateWrapper = new LambdaUpdateWrapper<>();
+            blogUpdateWrapper.in(Blog::getBlogId, Arrays.asList(ids))
+                    .set(Blog::getIsDeleted,1);
+            if (!blogService.update(blogUpdateWrapper)) {
                 throw new RuntimeException();
             }
+
+            //删除tagRelation
+            LambdaQueryWrapper<BlogTagRelation> tagRelationQueryWrapper = new LambdaQueryWrapper<>();
+            tagRelationQueryWrapper.in(BlogTagRelation::getBlogId, Arrays.asList(ids));
+            tagRelationService.remove(tagRelationQueryWrapper);
+
+            //删除文章关联的评论--更新评论标志位
+            LambdaUpdateWrapper<BlogComment> commentUpdateWrapper = new LambdaUpdateWrapper<>();
+            commentUpdateWrapper.in(BlogComment::getBlogId, Arrays.asList(ids))
+                    .set(BlogComment::getIsDeleted, 1);
+            commentService.update(commentUpdateWrapper);
+
             return ResultGenerator.genSuccessResult();
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -230,6 +283,85 @@ public class BlogController {
         }
     }
 
+    @Transactional
+    @PostMapping("/blogs/recover")
+    @ResponseBody
+    public Result recover(@RequestParam("blogId") Long blogId){
+        try {
+            Blog blog = blogService.getById(blogId);
+            if(blog.getIsDeleted() == 0){
+                return ResultGenerator.genSuccessResult();
+            }
+            //恢复文章--更新删除标志位
+            blog.setIsDeleted(0);
+            blogService.updateById(blog);
+
+            //判断分类是否被删除，并恢复
+            BlogCategory blogCategory = categoryService.getById(blog.getBlogCategoryId());
+            if(blogCategory.getIsDeleted() == 1){
+                blogCategory.setIsDeleted(0);
+                categoryService.updateById(blogCategory);
+            }
+
+            //判断tag是否删除，并恢复
+            String[] tags = blog.getBlogTags().split(",");
+            LambdaUpdateWrapper<BlogTag> TagUpdateWrapper = new LambdaUpdateWrapper<>();
+            TagUpdateWrapper.in(BlogTag::getTagName, Arrays.asList(tags))
+                    .set(BlogTag::getIsDeleted,0);
+            tagService.update(TagUpdateWrapper);
+
+            //恢复tagRelation
+            LambdaQueryWrapper<BlogTag> tagQueryWrapper = new LambdaQueryWrapper<>();
+            tagQueryWrapper.in(BlogTag::getTagName, Arrays.asList(tags));
+            List<BlogTag> blogTagList = tagService.list(tagQueryWrapper);
+            List<BlogTagRelation> blogTagRelationList = new ArrayList<>();
+            for (BlogTag blogTag:blogTagList){
+                BlogTagRelation tagRelation = new BlogTagRelation();
+                tagRelation.setTagId(blogTag.getTagId())
+                        .setBlogId(blogId)
+                        .setCreateTime(blog.getCreateTime());
+                blogTagRelationList.add(tagRelation);
+            }
+            tagRelationService.saveBatch(blogTagRelationList);
+
+            //恢复文章关联的评论--更新评论标志位
+            LambdaUpdateWrapper<BlogComment> commentUpdateWrapper = new LambdaUpdateWrapper<>();
+            commentUpdateWrapper.eq(BlogComment::getBlogId, blogId)
+                    .set(BlogComment::getIsDeleted, 0);
+            commentService.update(commentUpdateWrapper);
+
+            return ResultGenerator.genSuccessResult();
+        }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            log.error("恢复文章失败！");
+            return ResultGenerator.genFailResult("恢复失败");
+        }
+    }
+
+    @PostMapping("/blogs/post")
+    @ResponseBody
+    public Result post(@RequestBody Integer[] ids){
+        try {
+            LambdaQueryWrapper<Blog> blogQueryWrapper = new LambdaQueryWrapper<>();
+            blogQueryWrapper.in(Blog::getBlogId, Arrays.asList(ids))
+                    .eq(Blog::getBlogStatus,0);
+            if(blogService.count() == 0){
+                return ResultGenerator.genSuccessResult();
+            }
+            LambdaUpdateWrapper<Blog> blogUpdateWrapper = new LambdaUpdateWrapper<>();
+            blogUpdateWrapper.in(Blog::getBlogId, Arrays.asList(ids))
+                    .set(Blog::getBlogStatus,1);
+            blogService.update(blogUpdateWrapper);
+            return ResultGenerator.genSuccessResult();
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("发布文章失败！");
+            return ResultGenerator.genFailResult("发布失败");
+        }
+    }
+
+
     private boolean saveOrUpdateBlog(Blog newBlog, Blog oldBlog, String[] tags) {
         //插入或者更新blog
         BlogCategory blogCategory = categoryService.getById(newBlog.getBlogCategoryId());
@@ -238,7 +370,7 @@ public class BlogController {
             return false;
         }
 
-        if(oldBlog != null && StringUtils.equals(newBlog.getBlogTags(),oldBlog.getBlogTags())){
+        if (oldBlog != null && StringUtils.equals(newBlog.getBlogTags(), oldBlog.getBlogTags())) {
             return true;
         }
 
@@ -266,7 +398,7 @@ public class BlogController {
         List<BlogTagRelation> blogTagRelations = new ArrayList<>();
         //如果是修改blog，则需要删除或者插入tagRelation
         if (oldBlog != null) {
-            if(!StringUtils.equals(newBlog.getBlogTags(),oldBlog.getBlogTags())) {
+            if (!StringUtils.equals(newBlog.getBlogTags(), oldBlog.getBlogTags())) {
                 List<String> oldTagNameList = Arrays.asList(oldBlog.getBlogTags().split(","));
                 List<String> newTagNameList = Arrays.asList(tags);
                 List<String> saveTagNameList = new ArrayList<>();
@@ -292,8 +424,8 @@ public class BlogController {
                     List<BlogTag> tagList = tagService.list(tagLambdaQueryWrapper);
 
                     //刚刚新增的blogtag中获取blogtagid
-                    for (BlogTag blogTag:saveTags){
-                        if(saveTagNameList.contains(blogTag.getTagName())){
+                    for (BlogTag blogTag : saveTags) {
+                        if (saveTagNameList.contains(blogTag.getTagName())) {
                             tagList.add(blogTag);
                         }
                     }

@@ -44,7 +44,8 @@ public class LinkController {
             limit = 10;
         }
         LambdaQueryWrapper<BlogLink> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(BlogLink::getIsDeleted,0)
+        queryWrapper
+                //.eq(BlogLink::getIsDeleted,0)
                 .orderByAsc(BlogLink::getLinkRank);
         Page<BlogLink> pageQuery = new Page<>(page, limit);
         IPage<BlogLink> linkIPage = linkService.selectPage(pageQuery, queryWrapper);

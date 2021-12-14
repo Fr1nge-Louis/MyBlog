@@ -18,13 +18,13 @@
                         <th:block th:each="blog,iterStat : ${blogPageResult.list}">
                             <li class="post-list-item">
                                 <h3 class="post-list-title">
-                                    <a class="hvr-underline-from-center" th:href="@{'/blog/' + ${blog.blogId}}">
+                                    <a class="hvr-underline-from-center" th:href="@{'/blog/' + ${blog.blogId}}" target="_blank">
                                         <th:block th:text="${blog.blogTitle}"></th:block>
                                     </a>
                                 </h3>
                                 <th:block th:if="${null != blog.blogCoverImage && '' != blog.blogCoverImage}">
                                     <p class="post-list-cover-img">
-                                        <a th:href="@{'/blog/' + ${blog.blogId}}">
+                                        <a th:href="@{'/blog/' + ${blog.blogId}}" target="_blank">
                                             <img th:src="@{${blog.blogCoverImage}}" width="400" height="225">
                                         </a>
                                     </p>
@@ -77,12 +77,21 @@
             </div>
 
             <div class="col-md-4">
+
+                <h3 class="sidebar-title">搜索文章</h3>
+                <div class="input-group">
+                    <input type="text" id="searchbox" class="form-control"placeholder="搜索文章" />
+                    <span class="input-group-btn">
+                        <button onclick="search()" class="btn btn-info btn-search">搜索</button>
+                    </span>
+                </div>
+
                 <h3 class="sidebar-title">点击最多</h3>
                 <div id="blog-categories">
                     <ul class="list-group">
                         <th:block th:if="${null != hotBlogs}">
                             <th:block th:each="hotBlog : ${hotBlogs}">
-                                <li class="list-group-item"><a th:href="@{'/blog/' + ${hotBlog.blogId}}">
+                                <li class="list-group-item"><a th:href="@{'/blog/' + ${hotBlog.blogId}}" target="_blank">
                                     <th:block th:text="${hotBlog.blogTitle}"></th:block>
                                 </a></li>
                             </th:block>
@@ -94,7 +103,7 @@
                     <ul class="list-group">
                         <th:block th:if="${null != newBlogs}">
                             <th:block th:each="newBlog : ${newBlogs}">
-                                <li class="list-group-item"><a th:href="@{'/blog/' + ${newBlog.blogId}}">
+                                <li class="list-group-item"><a th:href="@{'/blog/' + ${newBlog.blogId}}" target="_blank">
                                     <th:block th:text="${newBlog.blogTitle}"></th:block>
                                 </a></li>
                             </th:block>
@@ -120,4 +129,15 @@
 </div>
 </body>
 <div th:replace="blog/yummy-jekyll/footer::footer"></div>
+<script>
+    function search() {
+        var q = $('#searchbox').val();
+        console.log(q)
+        if (q && q != '') {
+            //window.location.href = '/search/' + q;
+            window.open('/search/' + q)
+        }
+    }
+
+</script>
 </html>

@@ -2,8 +2,7 @@ package com.fr1nge.myblog.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.fr1nge.myblog.entity.AdminUser;
-import com.fr1nge.myblog.entity.BlogConfig;
+import com.fr1nge.myblog.entity.*;
 import com.fr1nge.myblog.service.*;
 import com.fr1nge.myblog.util.GetMD5;
 import com.fr1nge.myblog.util.JwtUtil;
@@ -80,7 +79,7 @@ public class AdminController {
 
     @GetMapping({"/login"})
     public String login(HttpServletRequest request) {
-        Map<String,String> config = getConfig();
+        Map<String, String> config = getConfig();
         request.setAttribute("websiteName", config.get("websiteName"));
         request.setAttribute("websiteIcon", config.get("websiteIcon"));
         return "admin/login";
@@ -90,9 +89,12 @@ public class AdminController {
     public String login(@RequestParam("userName") String userName,
                         @RequestParam("password") String password,
                         @RequestParam("verifyCode") String verifyCode,
-                        HttpSession session) {
+                        HttpSession session, HttpServletRequest request) {
         String kaptchaCode = (String) session.getAttribute("verifyCode");
+        Map<String, String> config = getConfig();
         if (StringUtils.isEmpty(kaptchaCode) || !verifyCode.equals(kaptchaCode)) {
+            request.setAttribute("websiteName", config.get("websiteName"));
+            request.setAttribute("websiteIcon", config.get("websiteIcon"));
             session.setAttribute("errorMsg", "验证码错误");
             return "admin/login";
         }
@@ -101,7 +103,7 @@ public class AdminController {
         AdminUser adminUser = adminUserService.getOne(wrapper);
         if (adminUser != null) {
             //设置session失效时间两个小时
-            session.setMaxInactiveInterval(60*60*2);
+            session.setMaxInactiveInterval(60 * 60 * 2);
             //登陆成功，将信息储存到session
             //储存用户信息
             session.setAttribute("loginUser", adminUser.getNickName());
@@ -110,9 +112,11 @@ public class AdminController {
             String token = JwtUtil.generateToken(signingKey, adminUser.getNickName());
             session.setAttribute(tokenName, token);
             //储存配置信息
-            session.setAttribute("config", getConfig());
+            session.setAttribute("config", config);
             return "redirect:/admin/index";
         } else {
+            request.setAttribute("websiteName", config.get("websiteName"));
+            request.setAttribute("websiteIcon", config.get("websiteIcon"));
             session.setAttribute("errorMsg", "登陆失败");
             return "admin/login";
         }
@@ -121,7 +125,7 @@ public class AdminController {
     @GetMapping("/user/logout")
     public String logout(HttpServletRequest request) {
         request.getSession().invalidate();
-        Map<String,String> config = getConfig();
+        Map<String, String> config = getConfig();
         request.setAttribute("websiteName", config.get("websiteName"));
         request.setAttribute("websiteIcon", config.get("websiteIcon"));
         return "admin/login";
@@ -150,7 +154,7 @@ public class AdminController {
         AdminUser adminUser = adminUserService.getById(loginUserId);
 
         //判断原来的密码是否正确
-        if (StringUtils.equals(GetMD5.encryptString(originalPassword),adminUser.getLoginPassword())) {
+        if (StringUtils.equals(GetMD5.encryptString(originalPassword), adminUser.getLoginPassword())) {
             return "修改失败";
         }
         //修改密码
@@ -182,7 +186,7 @@ public class AdminController {
         }
     }
 
-    private Map<String,String> getConfig(){
+    private Map<String, String> getConfig() {
         List<BlogConfig> blogConfigList = configService.list();
         Map<String, String> configMap = blogConfigList.stream()
                 .collect(Collectors.toMap(BlogConfig::getConfigName, BlogConfig::getConfigValue));

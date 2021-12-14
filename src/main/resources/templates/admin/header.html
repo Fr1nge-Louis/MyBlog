@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="header-fragment">
+    <!--  禁用缓存  -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title th:text="|${session.config.websiteName} - 后台管理系统|">My Blog</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Font Awesome -->
-    <link rel="shortcut icon" th:href="@{${session.config.websiteIcon}}"/>
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{${session.config.websiteIcon}}"/>
     <link rel="stylesheet" th:href="@{/admin/plugins/fontawesome-5.15.4/css/all.css}">
     <!-- Ionicons -->
     <link rel="stylesheet" th:href="@{/admin/dist/css/ionicons.min.css}">
@@ -32,7 +37,7 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
-            <a class="nav-link" th:href="@{/}">
+            <a class="nav-link" th:href="@{/}" target="_blank">
                 <i class="fa fa-paper-plane">&nbsp;&nbsp;博客首页</i>
             </a>
         </li>

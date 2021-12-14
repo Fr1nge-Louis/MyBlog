@@ -7,12 +7,12 @@ $('#blogTags').tagsInput({
 });
 
 //Initialize Select2 Elements
-$('.select2').select2()
+$('.select2').select2();
 
 $(function () {
     blogEditor = editormd("blog-editormd", {
         width: "100%",
-        height: 640,
+        height: 720,
         syncScrolling: "single",
         path: "/admin/plugins/editormd/lib/",
         toolbarModes: 'full',
@@ -26,21 +26,21 @@ $(function () {
     });
 
     $("#kv-explorer").fileinput({
-        'language':'zh',
+        'language': 'zh',
         'uploadUrl': '/admin/upload/file',
-        showPreview:false,
+        showPreview: false,
         dropZoneEnabled: false,
         maxFileSize: 102400
     });
 
-    $("#kv-explorer").on("fileuploaded", function(event, file, previewId, index) {
+    $("#kv-explorer").on("fileuploaded", function (event, file, previewId, index) {
         //file.response 得到后台处理后的结果
         //file.filescount 得到文件个数
         //index 当前文件的下标
         // console.log(event);
         // console.log(previewId);
         // console.log(file.response);
-        if (index === file.filescount-1 && file.response.resultCode === 200) {//当所有文件传输成功时
+        if (index === file.filescount - 1 && file.response.resultCode === 200) {//当所有文件传输成功时
             //在这里执行文件全部上传成功的方法
             // console.log(file.response.data);
             $('#blogCoverImage').val(file.response.data);
@@ -105,11 +105,11 @@ $('#confirmButton').click(function () {
         return;
     }
 
-    var arr =new Array();
+    var arr = new Array();
     arr = blogTags.split(',');
     // console.log(arr);
     // console.log(arr.length);
-    if (arr.length>6) {
+    if (arr.length > 6) {
         swal("标签数量限制为6", {
             icon: "error",
         });
@@ -162,6 +162,7 @@ $('#confirmButton').click(function () {
                 $('#articleModal').modal('hide');
                 swal({
                     title: swlMessage,
+                    icon: "success",
                     type: 'success',
                     showCancelButton: false,
                     confirmButtonColor: '#3085d6',
@@ -169,10 +170,19 @@ $('#confirmButton').click(function () {
                     confirmButtonClass: 'btn btn-success',
                     buttonsStyling: false
                 }).then(function () {
-                    window.location.href = "/admin/blogs";
+                    var keyword = $('#keyword').val();
+                    var pageNum = $("#pageNum").val();
+                    if (pageNum === null || pageNum < 1) {
+                        pageNum = 1
+                    }
+                    var pageSize = $("#pageSize").val();
+                    if (pageSize === null || pageSize < 1) {
+                        pageSize = 10;
+                    }
+                    var params = "?keyword=" + keyword + "&pageNum=" + pageNum + "&pageSize=" + pageSize;
+                    window.location.href = "/admin/blogs" + params;
                 })
-            }
-            else {
+            } else {
                 $('#articleModal').modal('hide');
                 swal(result.message, {
                     icon: "error",
@@ -189,7 +199,24 @@ $('#confirmButton').click(function () {
 
 //取消的方法
 $('#cancelButton').click(function () {
-    window.location.href = "/admin/blogs";
+    var keyword = $('#keyword').val();
+    var pageNum = $("#pageNum").val();
+    if (pageNum === null || pageNum < 1) {
+        pageNum = 1
+    }
+    var pageSize = $("#pageSize").val();
+    if (pageSize === null || pageSize < 1) {
+        pageSize = 10;
+    }
+    //var params = "?keyword=" + keyword + "&pageNum=" + pageNum + "&pageSize=" + pageSize;
+    //window.location.href = "/admin/blogs" + params;
+    var html = '<form action="/admin/blogs" method="post" name="editForm" style=\'display:none\'>' +
+        '<input name="keyword" hidden value="' + keyword + '">' +
+        '<input name="pageNum" hidden value="' + pageNum + '">' +
+        '<input name="pageSize" hidden value="' + pageSize + '">' +
+        '</form>'
+    document.write(html);
+    document.editForm.submit();
 });
 
 $('#uploadBlogCoverImage').click(function () {
@@ -199,7 +226,7 @@ $('#uploadBlogCoverImage').click(function () {
 
 $('#previewBlogCoverImage').click(function () {
     // console.log("previewBlogCoverImage");
-    if($('#blogCoverImage').val() === null || $('#blogCoverImage').val() === ''){
+    if ($('#blogCoverImage').val() === null || $('#blogCoverImage').val() === '') {
         swal("请上传或选择封面", {
             icon: "error",
         });
@@ -209,6 +236,4 @@ $('#previewBlogCoverImage').click(function () {
     $('#picPreview').html("<img src='" + $('#blogCoverImage').val() + "' height=\"450\" width=\"800\"/>");
     $('#picPreviewModal').modal('show');
 });
-
-
 
