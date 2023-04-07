@@ -17,14 +17,14 @@
                         th:text="${blogDetailVO.blogViews}"></th:block>
                              浏览</span>
                 </span>
-                <br>
-                <br>
-                <span class="meta-info">
-                       <th:block th:each="tag : ${blogDetailVO.blogTags}">
-                        <a th:href="@{'/tag/' + ${tag}}" role="button" class="btn btn-primary hvr-grow-shadow">
-                            <span class="flag-icon flag-icon-bl" th:text="${tag}"></span></a>
-                       </th:block>
-                    </span>
+<!--                <br>-->
+<!--                <br>-->
+<!--                <span class="meta-info">-->
+<!--                       <th:block th:each="tag : ${blogDetailVO.blogTags}">-->
+<!--                        <a th:href="@{'/tag/' + ${tag}}" role="button" class="btn btn-primary hvr-grow-shadow">-->
+<!--                            <span class="flag-icon flag-icon-bl" th:text="${tag}"></span></a>-->
+<!--                       </th:block>-->
+<!--                    </span>-->
             </div>
         </div>
     </section>

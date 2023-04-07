@@ -57,6 +57,7 @@ $('#commentSubmit').click(function () {
                 });
                 $('#commentBody').val('');
                 $('#verifyCode').val('');
+
             }
             else {
                 swal(result.message, {

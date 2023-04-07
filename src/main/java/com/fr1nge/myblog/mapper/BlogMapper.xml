@@ -25,4 +25,63 @@
         blog_id, blog_title, blog_sub_url, blog_cover_image, blog_content, blog_category_id, blog_category_name, blog_tags, blog_status, blog_views, enable_comment, is_deleted, create_time, update_time
     </sql>
 
+    <sql id="page_Column_List">
+        b.blog_id, b.blog_title, b.blog_sub_url, b.blog_cover_image, b.blog_category_id, b.blog_category_name,
+        b.blog_tags, b.blog_status, b.blog_views, b.enable_comment, b.is_deleted, b.create_time, b.update_time
+    </sql>
+
+    <select id="selectBlogPage" parameterType="map" resultType="com.fr1nge.myblog.entity.Blog">
+        select
+            <include refid="page_Column_List"/>
+        from
+            blog b
+        inner join
+            (
+            select
+                blog_id
+            from
+                blog
+            where
+                1=1
+                <if test="isDeleted!=null">
+                    AND is_deleted = 0
+                </if>
+                <if test="keyword!=null">
+                    AND (blog_title like CONCAT('%',#{keyword},'%' ) or blog_category_name like CONCAT('%',#{keyword},'%' ))
+                </if>
+                <if test="blogStatus!=null">
+                    AND blog_status = #{blogStatus}
+                </if>
+                <if test="blogCategoryId!=null">
+                    AND blog_category_id = #{blogCategoryId}
+                </if>
+            order by
+                create_time desc
+            limit #{rows},#{limit}
+            ) b1
+            on b.blog_id = b1.blog_id
+    </select>
+
+    <select id="selectBlogPageCount" parameterType="map" resultType="int">
+        select
+            count(*)
+        from
+            blog
+        where
+            1=1
+            <if test="isDeleted!=null">
+                AND is_deleted = 0
+            </if>
+            <if test="keyword!=null">
+                AND (blog_title like CONCAT('%',#{keyword},'%' ) or blog_category_name like CONCAT('%',#{keyword},'%' ))
+            </if>
+            <if test="blogStatus!=null">
+                AND blog_status = #{blogStatus}
+            </if>
+            <if test="blogCategoryId!=null">
+                AND blog_category_id = #{blogCategoryId}
+            </if>
+        order by
+            create_time desc
+    </select>
 </mapper>

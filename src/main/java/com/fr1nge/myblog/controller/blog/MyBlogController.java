@@ -1,6 +1,7 @@
 package com.fr1nge.myblog.controller.blog;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fr1nge.myblog.controller.vo.BlogDetailVO;
@@ -16,6 +17,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,34 +57,30 @@ public class MyBlogController {
      */
     @GetMapping({"/page/{pageNum}"})
     public String page(HttpServletRequest request, @PathVariable("pageNum") int pageNum) {
-        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+
 
         //分页详细博客
-        queryWrapper.eq(Blog::getBlogStatus, 1).eq(Blog::getIsDeleted, 0).orderByDesc(Blog::getCreateTime);
-        PageResult blogPageResult = getBlogByWrapper(queryWrapper, pageNum, 9);
+        Map<String,Object> param = new HashMap<>();
+        param.put("blogStatus",1);
+        param.put("isDeleted",0);
+        param.put("rows",(pageNum-1)*9);
+        param.put("limit",9);
+
+        PageResult blogPageResult = getBlogByMap(param, pageNum, 9);
         if (blogPageResult == null) {
             return "error/error_404";
         }
 
-        //最新博客
-        queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Blog::getBlogStatus, 1).eq(Blog::getIsDeleted, 0).orderByDesc(Blog::getCreateTime);
-        PageResult newBlogPageResult = getBlogByWrapper(queryWrapper, 0, 6);
-
-
-        //最热博客
-        queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Blog::getBlogStatus, 1).eq(Blog::getIsDeleted, 0).orderByDesc(Blog::getBlogViews);
-        PageResult hotBlogPageResult = getBlogByWrapper(queryWrapper, 0, 6);
-
-        //最热标签
-        List<BlogTagCount> hotTagResult = tagService.getTagCount();
-
+        //最热博客--点击最多
+        if(pageNum == 1) {
+            LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Blog::getBlogStatus, 1).eq(Blog::getIsDeleted, 0).orderByDesc(Blog::getBlogViews);
+            queryWrapper.select(Blog::getBlogId, Blog::getCreateTime, Blog::getBlogTitle, Blog::getBlogCategoryName);
+            PageResult hotBlogPageResult = getBlogByWrapper(queryWrapper, 0, 3);
+            request.getSession().setAttribute("hotBlogs", hotBlogPageResult.getList());
+        }
         //返回值设定
         request.setAttribute("blogPageResult", blogPageResult);
-        request.setAttribute("newBlogs", newBlogPageResult.getList());
-        request.setAttribute("hotBlogs", hotBlogPageResult.getList());
-        request.setAttribute("hotTags", hotTagResult);
         request.setAttribute("pageName", "首页");
         request.setAttribute("configurations", getConfig());
         return "blog/" + theme + "/index";
@@ -97,7 +95,6 @@ public class MyBlogController {
     public String categories(HttpServletRequest request) {
         LambdaQueryWrapper<BlogCategory> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BlogCategory::getIsDeleted, 0).orderByAsc(BlogCategory::getCreateTime);
-        request.setAttribute("hotTags", tagService.getTagCount());
         request.setAttribute("categories", categoryService.list(queryWrapper));
         request.setAttribute("pageName", "分类页面");
         request.setAttribute("configurations", getConfig());
@@ -115,6 +112,7 @@ public class MyBlogController {
                          @RequestParam(value = "commentPage", required = false, defaultValue = "1") Integer commentPage) {
         Blog blog = blogService.getById(blogId);
         if (blog != null) {
+            /***
             //增加浏览量
             long views = blog.getBlogViews() + 1;
             blog.setBlogViews(views);
@@ -156,9 +154,8 @@ public class MyBlogController {
                 commentPageResult = new PageResult(commentIPage.getRecords(),
                         (int) commentIPage.getTotal(), (int) commentIPage.getSize(), commentPage);
             }
-            request.setAttribute("blogDetailVO", blogDetailVO);
-            request.setAttribute("commentPageResult", commentPageResult);
-
+             */
+            getBlogDetailAndComment(blog,request,commentPage);
         }
 
         request.setAttribute("pageName", "详情");
@@ -294,7 +291,7 @@ public class MyBlogController {
         if (StringUtils.isEmpty(verifyCode)) {
             return ResultGenerator.genFailResult("验证码不能为空");
         }
-        String kaptchaCode = session.getAttribute("verifyCode") + "";
+        String kaptchaCode = session.getAttribute("verifyCode").toString();
         if (StringUtils.isEmpty(kaptchaCode)) {
             return ResultGenerator.genFailResult("非法请求");
         }
@@ -357,10 +354,26 @@ public class MyBlogController {
         }
     }
 
+    @GetMapping("/my/resume")
+    public String getResume(HttpServletRequest request){
+        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Blog::getBlogSubUrl, "resume");
+        Blog blog = blogService.getOne(queryWrapper);
+
+        if (blog != null) {
+            getBlogDetailForPreview(blog, request, 1);
+            request.setAttribute("pageName", "resume");
+            request.setAttribute("configurations", getConfig());
+            return "blog/resume/detail";
+        } else {
+            return "error/error_400";
+        }
+    }
+
     /**
      * 预览文章
      */
-    @GetMapping({"/preview/{subUrl}", "/my/{subUrl}"})
+    @GetMapping({"/preview/{subUrl}"})
     public String previewDetail(HttpServletRequest request,
                                 @PathVariable("subUrl") String subUrl,
                                 @RequestParam(value = "commentPage", required = false, defaultValue = "1") Integer commentPage) {
@@ -384,19 +397,16 @@ public class MyBlogController {
 
     @GetMapping({"/search/{keyword}/{page}"})
     public String search(HttpServletRequest request, @PathVariable("keyword") String keyword, @PathVariable("page") Integer page) {
-        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Blog::getBlogStatus, 1)
-                .eq(Blog::getIsDeleted, 0)
-                .and(
-                        wq -> wq.like(Blog::getBlogTitle, keyword).or()
-                                .like(Blog::getBlogTags, keyword).or()
-                                .like(Blog::getBlogCategoryName, keyword)
-                )
-                .orderByDesc(Blog::getCreateTime);
-        PageResult blogPageResult = getBlogByWrapper(queryWrapper, page, 9);
-        if (blogPageResult.getList().size() == 0) {
-            blogPageResult = null;
+        Map<String,Object> param = new HashMap<>();
+        if(keyword.isEmpty()){
+            keyword = null;
         }
+        param.put("keyword",keyword);
+        param.put("rows",(page-1)*9);
+        param.put("limit",9);
+
+        PageResult blogPageResult = getBlogByMap(param,page,9);
+
         request.setAttribute("blogPageResult", blogPageResult);
         request.setAttribute("pageName", "搜索");
         request.setAttribute("pageUrl", "search");
@@ -427,6 +437,13 @@ public class MyBlogController {
                 (int) blogIPage.getSize(), pageNum);
     }
 
+
+    private PageResult getBlogByMap(Map<String,Object> param, int pageNum, int pageSize) {
+        List<Blog> blogList = blogService.selectBlogPage(param);
+        int total = blogService.selectBlogPageCount(param);
+        return new PageResult(blogList,total,pageSize,pageNum);
+    }
+
     //获取所有的配置Map
     private Map<String, String> getConfig() {
         List<BlogConfig> blogConfigList = configService.list();
@@ -438,8 +455,10 @@ public class MyBlogController {
     private void getBlogDetailAndComment(Blog blog, HttpServletRequest request, int commentPage) {
         //增加浏览量
         long views = blog.getBlogViews() + 1;
-        blog.setBlogViews(views);
-        blogService.updateById(blog);
+        LambdaUpdateWrapper<Blog> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(Blog::getBlogViews,views);
+        updateWrapper.eq(Blog::getBlogId,blog.getBlogId());
+        blogService.update(updateWrapper);
 
         //BlogDetailVO
         BlogDetailVO blogDetailVO = new BlogDetailVO();
@@ -456,10 +475,10 @@ public class MyBlogController {
         }
         blogDetailVO.setBlogCategoryIcon(blogCategory.getCategoryIcon());
         //标签
-        if (!StringUtils.isEmpty(blog.getBlogTags())) {
-            List<String> tags = Arrays.asList(blog.getBlogTags().split(","));
-            blogDetailVO.setBlogTags(tags);
-        }
+//        if (!StringUtils.isEmpty(blog.getBlogTags())) {
+//            List<String> tags = Arrays.asList(blog.getBlogTags().split(","));
+//            blogDetailVO.setBlogTags(tags);
+//        }
 
         //如果开启了评论，就获取评论
         if (blog.getEnableComment() == 1) {
@@ -484,7 +503,6 @@ public class MyBlogController {
         request.setAttribute("blogDetailVO", blogDetailVO);
 
     }
-
 
     private void getBlogDetailForPreview(Blog blog, HttpServletRequest request, int commentPage) {
         //BlogDetailVO

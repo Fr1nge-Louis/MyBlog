@@ -50,4 +50,7 @@ public class GetMD5 {
         return md5str.toString().toUpperCase();
     }
 
+    public static void main(String[] args) {
+        System.out.println(GetMD5.encryptString("123456"));
+    }
 }

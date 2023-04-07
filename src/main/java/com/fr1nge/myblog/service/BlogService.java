@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fr1nge.myblog.entity.Blog;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * <p>
  * 服务类
@@ -15,4 +18,6 @@ import com.fr1nge.myblog.entity.Blog;
  */
 public interface BlogService extends IService<Blog> {
     IPage<Blog> selectPage(IPage<Blog> page, Wrapper<Blog> wrapper);
+    List<Blog> selectBlogPage(Map<String,Object> map);
+    int selectBlogPageCount(Map<String,Object> map);
 }

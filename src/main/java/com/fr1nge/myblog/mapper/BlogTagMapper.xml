@@ -37,7 +37,8 @@
                         left join blog_tag bt on
                         tr.tag_id = bt.tag_id
                 where
-                    b.is_deleted = 0 and b.blog_status = 1) trb
+                    b.is_deleted = 0 and b.blog_status = 1
+                ) trb
         group by
             tag_id
         order by

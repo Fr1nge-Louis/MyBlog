@@ -48,46 +48,30 @@ public class BlogController {
                        @RequestParam(required = false) String blogCategoryId,
                        @RequestParam(required = false) Integer page,
                        @RequestParam(required = false) Integer limit) {
-
-        LambdaQueryWrapper<Blog> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(
-                Blog::getBlogId,
-                Blog::getBlogTitle,
-                Blog::getBlogSubUrl,
-                Blog::getBlogCoverImage,
-                Blog::getBlogCategoryId,
-                Blog::getBlogCategoryName,
-                Blog::getBlogTags,
-                Blog::getBlogStatus,
-                Blog::getBlogViews,
-                Blog::getEnableComment,
-                Blog::getIsDeleted,
-                Blog::getCreateTime,
-                Blog::getUpdateTime);
-        //queryWrapper.eq(Blog::getIsDeleted, 0);
+        Map<String,Object> param = new HashMap<>();
         if (StringUtils.isNotBlank(keyword)) {
-            queryWrapper.like(Blog::getBlogTitle, keyword).or()
-                    .like(Blog::getBlogCategoryName, keyword);
+            param.put("keyword",keyword);
         }
         if (StringUtils.isNotBlank(blogStatus)) {
-            queryWrapper.eq(Blog::getBlogStatus, blogStatus);
+            param.put("blogStatus",blogStatus);
         }
         if (StringUtils.isNotBlank(blogCategoryId)) {
-            queryWrapper.eq(Blog::getBlogCategoryId, blogCategoryId);
+            param.put("blogCategoryId",blogCategoryId);
         }
-        queryWrapper.orderByDesc(Blog::getCreateTime);
         if (page == null) {
             page = 1;
         }
         if (limit == null) {
             limit = 10;
         }
-        Page<Blog> pageQuery = new Page<>(page, limit);
-        IPage<Blog> blogIPage = blogService.selectPage(pageQuery, queryWrapper);
-        PageResult pageResult = new PageResult(blogIPage.getRecords(),
-                (int) blogIPage.getTotal(), (int) blogIPage.getSize(), page);
-        return ResultGenerator.genSuccessResult(pageResult);
+        param.put("rows",(page-1)*limit);
+        param.put("limit",limit);
 
+        List<Blog> blogList = blogService.selectBlogPage(param);
+        int total = blogService.selectBlogPageCount(param);
+        PageResult pageResult = new PageResult(blogList,total,limit,page);
+
+        return ResultGenerator.genSuccessResult(pageResult);
     }
 
 

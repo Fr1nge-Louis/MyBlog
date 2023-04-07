@@ -3,7 +3,8 @@
 <div th:replace="blog/yummy-jekyll/header::header('首页','My Blog')"></div>
 <body>
 <div class="content">
-    <section class="jumbotron">
+    <section class="jumbotron"
+             th:style="@{'background:url(' + ${configurations.get('backgroudImg')} + ');background-repeat:no-repeat;background-size:100%;background-attachment: fixed;'}">
         <div class="container">
             <h3 th:text="${configurations.get('websiteDescription')}">我不怕千万人阻挡，只怕自己投降！</h3>
         </div>
@@ -18,7 +19,7 @@
                         <th:block th:each="blog,iterStat : ${blogPageResult.list}">
                             <li class="post-list-item">
                                 <h3 class="post-list-title">
-                                    <a class="hvr-underline-from-center" th:href="@{'/blog/' + ${blog.blogId}}" target="_blank">
+                                    <a class="hvr-underline-from-center" th:href="@{'/blog/' + ${blog.blogId}}">
                                         <th:block th:text="${blog.blogTitle}"></th:block>
                                     </a>
                                 </h3>
@@ -29,11 +30,6 @@
                                         </a>
                                     </p>
                                 </th:block>
-<!--                                <th:block th:if="${null == blog.blogCoverImage}">-->
-<!--                                    <p class="post-list-title">-->
-<!--                                        <th:block th:text="${#strings.substring(blog.blogContent,0,80)+'......'}" ></th:block>-->
-<!--                                    </p>-->
-<!--                                </th:block>-->
                                 <p class="post-list-meta">
                                     <span class="octicon octicon-calendar"
                                           th:text="${#dates.format(blog.createTime, 'yyyy-MM-dd')}">
@@ -87,54 +83,44 @@
                 </div>
 
                 <h3 class="sidebar-title">点击最多</h3>
-                <div id="blog-categories">
-                    <ul class="list-group">
-                        <th:block th:if="${null != hotBlogs}">
-                            <th:block th:each="hotBlog : ${hotBlogs}">
-                                <li class="list-group-item"><a th:href="@{'/blog/' + ${hotBlog.blogId}}" target="_blank">
-                                    <th:block th:text="${hotBlog.blogTitle}"></th:block>
-                                </a></li>
-                            </th:block>
-                        </th:block>
-                    </ul>
-                </div>
-                <h3 class="sidebar-title">最新发布</h3>
-                <div id="blog-categories">
-                    <ul class="list-group">
-                        <th:block th:if="${null != newBlogs}">
-                            <th:block th:each="newBlog : ${newBlogs}">
-                                <li class="list-group-item"><a th:href="@{'/blog/' + ${newBlog.blogId}}" target="_blank">
-                                    <th:block th:text="${newBlog.blogTitle}"></th:block>
-                                </a></li>
-                            </th:block>
-                        </th:block>
-                    </ul>
-                </div>
-                <h3 class="sidebar-title">标签栏</h3>
-                <div id="blog-categories">
-                    <ul class="list-group">
-                        <th:block th:if="${null != hotTags}">
-                            <th:block th:each="hotTag : ${hotTags}">
-                                <li class="list-group-item"><a th:href="@{'/tag/' + ${hotTag.tagName}}">
-                                    <th:block th:text="${hotTag.tagName}"></th:block>
-                                    <span class="badge" th:text="${hotTag.tagCount}">1</span>
-                                </a></li>
-                            </th:block>
-                        </th:block>
-                    </ul>
-                </div>
+                <th:block th:if="${null != session.hotBlogs}">
+                    <th:block th:each="hotBlog : ${session.hotBlogs}">
+                        <div class="thumbnail">
+                            <div class="card-image geopattern" style="background-color: #2aabd2">
+                                <div class="card-image-cell">
+                                    <h4 class="card-title">
+                                        <a th:href="@{'/blog/'+${hotBlog.blogId}}">
+                                            <th:block th:text="${hotBlog.blogTitle}"></th:block>
+                                        </a>
+                                    </h4>
+                                </div>
+                            </div>
+                            <div class="caption">
+                                <div class="card-description">
+                                    <p class="card-text"><th:block th:text="${hotBlog.blogCategoryName}"></th:block></p>
+                                </div>
+                                <div class="card-text">
+                                    <span data-toggle="tooltip" class="meta-info">
+                                        <span class="octicon octicon-clock"></span>
+                                        <span th:text="${#dates.format(hotBlog.createTime,'yyyy-MM-dd')}"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
+                </th:block>
             </div>
         </div>
     </section>
 </div>
 </body>
 <div th:replace="blog/yummy-jekyll/footer::footer"></div>
+
 <script>
     function search() {
         var q = $('#searchbox').val();
         console.log(q)
         if (q && q != '') {
-            //window.location.href = '/search/' + q;
             window.open('/search/' + q)
         }
     }
